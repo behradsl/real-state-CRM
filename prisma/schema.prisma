@@ -3,7 +3,9 @@
 // Review and adjust before first migration.
 
 generator client {
-  provider = "prisma-client-js"
+  provider     = "prisma-client-js"
+  // NestJS uses CommonJS; Prisma 7 defaults to ESM without this.
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -15,6 +17,7 @@ datasource db {
 // ─────────────────────────────────────────────
 
 enum UserRole {
+  ADMIN
   OWNER
   MANAGER
   AGENT
@@ -83,6 +86,12 @@ enum ActivityStatus {
   CANCELLED
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 // ─────────────────────────────────────────────
 // Multi-tenant agency
 // ─────────────────────────────────────────────
@@ -141,9 +150,10 @@ model Client {
   id             String     @id @default(cuid())
   organizationId String
   ownerId        String
-  type           ClientType @default(BUYER)
+  type           ClientType? 
   firstName      String
   lastName       String
+  gender         Gender?
   email          String?
   phone          String?
   secondaryPhone String?
