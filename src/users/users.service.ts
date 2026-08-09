@@ -2,9 +2,13 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import {
+  comparePassword,
+  hashPassword,
+} from '../common/utils/password.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -29,7 +33,7 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateUserDto): Promise<PublicUser> {
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const passwordHash = await hashPassword(dto.password);
 
     try {
       return await this.prisma.user.create({
@@ -82,7 +86,7 @@ export class UsersService {
     };
 
     if (dto.password) {
-      data.passwordHash = await bcrypt.hash(dto.password, 10);
+      data.passwordHash = await hashPassword(dto.password);
     }
 
     try {
@@ -107,6 +111,33 @@ export class UsersService {
     } catch (error) {
       this.handlePrismaError(error);
     }
+  }
+
+  /**
+   * For future auth/login: verify email + password within an organization.
+   */
+  async validateCredentials(
+    organizationId: string,
+    email: string,
+    password: string,
+  ): Promise<PublicUser> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        organizationId_email: { organizationId, email },
+      },
+    });
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const matches = await comparePassword(password, user.passwordHash);
+    if (!matches) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const { passwordHash: _, ...publicUser } = user;
+    return publicUser;
   }
 
   private handlePrismaError(error: unknown): never {

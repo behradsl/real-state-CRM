@@ -9,20 +9,20 @@ import { UserRole } from '@prisma/client';
 
 export class CreateUserDto {
   @IsString()
-  organizationId: string;
+  organizationId!: string;
 
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(8)
-  password: string;
+  password!: string;
 
   @IsString()
-  firstName: string;
+  firstName!: string;
 
   @IsString()
-  lastName: string;
+  lastName!: string;
 
   @IsOptional()
   @IsString()
