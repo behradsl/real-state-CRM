@@ -26,7 +26,9 @@ const userPublicSelect = {
   updatedAt: true,
 } satisfies Prisma.UserSelect;
 
-type PublicUser = Prisma.UserGetPayload<{ select: typeof userPublicSelect }>;
+export type PublicUser = Prisma.UserGetPayload<{
+  select: typeof userPublicSelect;
+}>;
 
 @Injectable()
 export class UsersService {
