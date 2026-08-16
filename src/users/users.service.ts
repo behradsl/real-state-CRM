@@ -1,10 +1,19 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
+import {
+  assertCanAccessUser,
+  assertCanAssignRole,
+  isAdmin,
+  isOwner,
+  resolveCreateUserOrganizationId,
+  userListWhere,
+} from '../common/utils/access-scope.util';
 import {
   comparePassword,
   hashPassword,
@@ -34,13 +43,19 @@ export type PublicUser = Prisma.UserGetPayload<{
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateUserDto): Promise<PublicUser> {
+  async create(actor: PublicUser, dto: CreateUserDto): Promise<PublicUser> {
+    const organizationId = resolveCreateUserOrganizationId(
+      actor,
+      dto.organizationId,
+    );
+    assertCanAssignRole(actor, dto.role);
+
     const passwordHash = await hashPassword(dto.password);
 
     try {
       return await this.prisma.user.create({
         data: {
-          organizationId: dto.organizationId,
+          organizationId,
           email: dto.email,
           passwordHash,
           firstName: dto.firstName,
@@ -55,14 +70,15 @@ export class UsersService {
     }
   }
 
-  findAll(): Promise<PublicUser[]> {
+  findAll(actor: PublicUser): Promise<PublicUser[]> {
     return this.prisma.user.findMany({
+      where: userListWhere(actor),
       select: userPublicSelect,
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(id: string): Promise<PublicUser> {
+  async findOne(actor: PublicUser, id: string): Promise<PublicUser> {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: userPublicSelect,
@@ -72,11 +88,19 @@ export class UsersService {
       throw new NotFoundException(`User ${id} not found`);
     }
 
+    assertCanAccessUser(actor, user);
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<PublicUser> {
-    await this.findOne(id);
+  async update(
+    actor: PublicUser,
+    id: string,
+    dto: UpdateUserDto,
+  ): Promise<PublicUser> {
+    const existing = await this.findOne(actor, id);
+
+    this.assertCanMutateUser(actor, existing, dto);
+    assertCanAssignRole(actor, dto.role);
 
     const data: Prisma.UserUpdateInput = {
       email: dto.email,
@@ -86,6 +110,12 @@ export class UsersService {
       role: dto.role,
       isActive: dto.isActive,
     };
+
+    // Non-admin / non-owner editing themselves cannot change role or active flag
+    if (!isAdmin(actor) && !isOwner(actor)) {
+      delete data.role;
+      delete data.isActive;
+    }
 
     if (dto.password) {
       data.passwordHash = await hashPassword(dto.password);
@@ -102,8 +132,17 @@ export class UsersService {
     }
   }
 
-  async remove(id: string): Promise<PublicUser> {
-    await this.findOne(id);
+  async remove(actor: PublicUser, id: string): Promise<PublicUser> {
+    const existing = await this.findOne(actor, id);
+
+    if (!isAdmin(actor) && !isOwner(actor)) {
+      throw new ForbiddenException('You cannot delete users');
+    }
+
+    // Owners cannot delete admins
+    if (isOwner(actor) && existing.role === UserRole.ADMIN) {
+      throw new ForbiddenException('You cannot delete an admin user');
+    }
 
     try {
       return await this.prisma.user.delete({
@@ -115,9 +154,6 @@ export class UsersService {
     }
   }
 
-  /**
-   * For future auth/login: verify email + password within an organization.
-   */
   async validateCredentials(
     organizationId: string,
     email: string,
@@ -140,6 +176,34 @@ export class UsersService {
 
     const { passwordHash: _, ...publicUser } = user;
     return publicUser;
+  }
+
+  private assertCanMutateUser(
+    actor: PublicUser,
+    target: PublicUser,
+    dto: UpdateUserDto,
+  ): void {
+    if (isAdmin(actor)) {
+      return;
+    }
+
+    if (isOwner(actor)) {
+      if (target.role === UserRole.ADMIN) {
+        throw new ForbiddenException('You cannot modify an admin user');
+      }
+      return;
+    }
+
+    // Regular users: only self, and not privilege fields (stripped above)
+    if (actor.id !== target.id) {
+      throw new ForbiddenException('You do not have access to this user');
+    }
+
+    if (dto.role !== undefined || dto.isActive !== undefined) {
+      throw new ForbiddenException(
+        'You cannot change role or active status',
+      );
+    }
   }
 
   private handlePrismaError(error: unknown): never {

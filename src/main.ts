@@ -52,6 +52,12 @@ async function bootstrap() {
         '2. Browser/Swagger stores the cookie automatically',
         '3. Protected routes require that cookie',
         '',
+        '### Roles',
+        '- **ADMIN** — full access across all organizations',
+        '- **OWNER** — access to users/data in their organization',
+        '- **MANAGER / AGENT / ASSISTANT** — access to their own data only',
+        '- Creating users is limited to **ADMIN** and **OWNER**',
+        '',
         'Use **Authorize** in Swagger and set the cookie value after login if needed.',
       ].join('\n'),
     )
@@ -64,7 +70,8 @@ async function bootstrap() {
     })
     .addTag('Health', 'Service health checks')
     .addTag('Auth', 'Login, logout, and current session')
-    .addTag('Users', 'User CRUD (requires session)')
+    .addTag('Users', 'User CRUD with role-based access')
+    .addTag('Properties', 'Property listings with role-based access')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

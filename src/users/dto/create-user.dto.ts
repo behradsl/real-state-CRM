@@ -11,7 +11,8 @@ import {
 export class CreateUserDto {
   @ApiProperty({
     format: 'uuid',
-    description: 'Organization this user belongs to',
+    description:
+      'Organization this user belongs to. Ignored for OWNER (forced to their org). Required for ADMIN.',
   })
   @IsString()
   organizationId!: string;
