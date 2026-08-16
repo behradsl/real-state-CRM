@@ -10,8 +10,8 @@ import {
   isAdmin,
   isOwner,
   propertyListWhere,
-  resolvePropertyOrganizationId,
-  resolvePropertyOwnerId,
+  resolveScopedOrganizationId,
+  resolveScopedOwnerId,
 } from '../common/utils/access-scope.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { PublicUser } from '../users/users.service';
@@ -65,11 +65,11 @@ export class PropertiesService {
     actor: PublicUser,
     dto: CreatePropertyDto,
   ): Promise<PublicProperty> {
-    const organizationId = resolvePropertyOrganizationId(
+    const organizationId = resolveScopedOrganizationId(
       actor,
       dto.organizationId,
     );
-    const ownerId = resolvePropertyOwnerId(actor, dto.ownerId);
+    const ownerId = resolveScopedOwnerId(actor, dto.ownerId);
 
     await this.assertAssigneeInOrganization(ownerId, organizationId);
 
@@ -160,7 +160,7 @@ export class PropertiesService {
       if (!isAdmin(actor) && !isOwner(actor)) {
         throw new ForbiddenException('You cannot reassign this property');
       }
-      ownerId = resolvePropertyOwnerId(actor, dto.ownerId);
+      ownerId = resolveScopedOwnerId(actor, dto.ownerId);
       await this.assertAssigneeInOrganization(ownerId, existing.organizationId);
     }
 

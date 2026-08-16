@@ -72,6 +72,7 @@ async function bootstrap() {
     .addTag('Auth', 'Login, logout, and current session')
     .addTag('Users', 'User CRUD with role-based access')
     .addTag('Properties', 'Property listings with role-based access')
+    .addTag('Clients', 'CRM contacts with role-based access')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

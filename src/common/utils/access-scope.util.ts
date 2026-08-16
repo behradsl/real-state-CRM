@@ -142,11 +142,11 @@ export function assertCanAccessProperty(
 }
 
 /**
- * Organization for a new property:
+ * Organization for a new org-scoped resource:
  * - ADMIN may choose any org
  * - everyone else is forced to their own org
  */
-export function resolvePropertyOrganizationId(
+export function resolveScopedOrganizationId(
   actor: PublicUser,
   requestedOrganizationId?: string,
 ): string {
@@ -161,11 +161,11 @@ export function resolvePropertyOrganizationId(
 }
 
 /**
- * Assigned agent (ownerId) for a new property:
+ * Assigned agent (ownerId) for a new org-scoped resource:
  * - default: current user
  * - ADMIN / OWNER may assign another user (caller validates membership)
  */
-export function resolvePropertyOwnerId(
+export function resolveScopedOwnerId(
   actor: PublicUser,
   requestedOwnerId?: string,
 ): string {
@@ -178,8 +178,56 @@ export function resolvePropertyOwnerId(
   }
 
   if (requestedOwnerId !== actor.id) {
-    throw new ForbiddenException('You can only assign properties to yourself');
+    throw new ForbiddenException('You can only assign records to yourself');
   }
 
   return actor.id;
 }
+
+/**
+ * Prisma `where` for listing clients:
+ * - ADMIN → all (non-deleted)
+ * - OWNER → organization clients
+ * - others → clients they own (ownerId)
+ */
+export function clientListWhere(actor: PublicUser): Prisma.ClientWhereInput {
+  const notDeleted: Prisma.ClientWhereInput = { deletedAt: null };
+
+  if (isAdmin(actor)) {
+    return notDeleted;
+  }
+
+  if (isOwner(actor)) {
+    return { ...notDeleted, organizationId: actor.organizationId };
+  }
+
+  return { ...notDeleted, ownerId: actor.id };
+}
+
+/**
+ * Ensures actor may access a client record.
+ */
+export function assertCanAccessClient(
+  actor: PublicUser,
+  client: { ownerId: string; organizationId: string },
+): void {
+  if (isAdmin(actor)) {
+    return;
+  }
+
+  if (isOwner(actor) && actor.organizationId === client.organizationId) {
+    return;
+  }
+
+  if (actor.id === client.ownerId) {
+    return;
+  }
+
+  throw new ForbiddenException('You do not have access to this client');
+}
+
+/** @deprecated use resolveScopedOrganizationId */
+export const resolvePropertyOrganizationId = resolveScopedOrganizationId;
+
+/** @deprecated use resolveScopedOwnerId */
+export const resolvePropertyOwnerId = resolveScopedOwnerId;

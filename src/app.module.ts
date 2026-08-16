@@ -9,6 +9,7 @@ import {
   getThrottleLimit,
   getThrottleTtlMs,
 } from './common/config/security.config';
+import { ClientsModule } from './clients/clients.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PropertiesModule } from './properties/properties.module';
 import { UsersModule } from './users/users.module';
@@ -28,6 +29,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
     PropertiesModule,
+    ClientsModule,
   ],
   controllers: [AppController],
   providers: [
