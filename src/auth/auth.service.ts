@@ -3,11 +3,13 @@ import { randomBytes } from 'crypto';
 import { Response } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { PublicUser, UsersService } from '../users/users.service';
+import { SESSION_MAX_AGE_MS } from './auth.constants';
+import { LoginDto } from './dto/login.dto';
 import {
   SESSION_COOKIE_NAME,
-  SESSION_MAX_AGE_MS,
-} from './auth.constants';
-import { LoginDto } from './dto/login.dto';
+  getClearSessionCookieOptions,
+  getSessionCookieOptions,
+} from './session-cookie';
 
 @Injectable()
 export class AuthService {
@@ -51,12 +53,7 @@ export class AuthService {
       where: { token: sessionToken },
     });
 
-    res.clearCookie(SESSION_COOKIE_NAME, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-    });
+    res.clearCookie(SESSION_COOKIE_NAME, getClearSessionCookieOptions());
 
     return { ok: true };
   }
@@ -97,12 +94,6 @@ export class AuthService {
   }
 
   private setSessionCookie(res: Response, token: string) {
-    res.cookie(SESSION_COOKIE_NAME, token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: SESSION_MAX_AGE_MS,
-      path: '/',
-    });
+    res.cookie(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
   }
 }
