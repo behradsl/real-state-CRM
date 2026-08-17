@@ -5,8 +5,12 @@ export class UserResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ format: 'uuid' })
-  organizationId!: string;
+  @ApiPropertyOptional({
+    format: 'uuid',
+    nullable: true,
+    description: 'Null only for platform ADMIN users',
+  })
+  organizationId!: string | null;
 
   @ApiProperty({ example: 'agent@agency.com' })
   email!: string;

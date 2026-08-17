@@ -24,7 +24,7 @@ export function userListWhere(actor: PublicUser): Prisma.UserWhereInput {
   }
 
   if (isOwner(actor)) {
-    return { organizationId: actor.organizationId };
+    return { organizationId: requireOrganizationId(actor) };
   }
 
   return { id: actor.id };
@@ -44,7 +44,11 @@ export function assertCanAccessUser(
     return;
   }
 
-  if (isOwner(actor) && actor.organizationId === target.organizationId) {
+  if (
+    isOwner(actor) &&
+    actor.organizationId !== null &&
+    actor.organizationId === target.organizationId
+  ) {
     return;
   }
 
@@ -57,19 +61,29 @@ export function assertCanAccessUser(
 
 /**
  * Rules when creating a user:
- * - ADMIN may create in any org and any role
+ * - ADMIN may create ADMIN with null org; otherwise organizationId required
  * - OWNER may only create in their org, and cannot create ADMIN
  */
 export function resolveCreateUserOrganizationId(
   actor: PublicUser,
-  requestedOrganizationId: string,
-): string {
+  requestedOrganizationId: string | undefined,
+  role: UserRole | undefined,
+): string | null {
   if (isAdmin(actor)) {
+    const effectiveRole = role ?? UserRole.AGENT;
+    if (effectiveRole === UserRole.ADMIN) {
+      return requestedOrganizationId ?? null;
+    }
+    if (!requestedOrganizationId) {
+      throw new ForbiddenException(
+        'organizationId is required when creating a non-admin user',
+      );
+    }
     return requestedOrganizationId;
   }
 
   if (isOwner(actor)) {
-    return actor.organizationId;
+    return requireOrganizationId(actor);
   }
 
   throw new ForbiddenException(
@@ -110,7 +124,7 @@ export function propertyListWhere(actor: PublicUser): Prisma.PropertyWhereInput 
   }
 
   if (isOwner(actor)) {
-    return { ...notDeleted, organizationId: actor.organizationId };
+    return { ...notDeleted, organizationId: requireOrganizationId(actor) };
   }
 
   return { ...notDeleted, ownerId: actor.id };
@@ -130,7 +144,10 @@ export function assertCanAccessProperty(
     return;
   }
 
-  if (isOwner(actor) && actor.organizationId === property.organizationId) {
+  if (
+    isOwner(actor) &&
+    actor.organizationId === property.organizationId
+  ) {
     return;
   }
 
@@ -139,6 +156,98 @@ export function assertCanAccessProperty(
   }
 
   throw new ForbiddenException('You do not have access to this property');
+}
+
+/**
+ * Parties / contracts list:
+ * - ADMIN → all (non-deleted)
+ * - OWNER / staff → same organization
+ */
+export function partyListWhere(actor: PublicUser): Prisma.PartyWhereInput {
+  const notDeleted: Prisma.PartyWhereInput = { deletedAt: null };
+
+  if (isAdmin(actor)) {
+    return notDeleted;
+  }
+
+  return { ...notDeleted, organizationId: requireOrganizationId(actor) };
+}
+
+export function assertCanAccessParty(
+  actor: PublicUser,
+  party: { organizationId: string },
+): void {
+  if (isAdmin(actor)) {
+    return;
+  }
+
+  if (actor.organizationId === party.organizationId) {
+    return;
+  }
+
+  throw new ForbiddenException('You do not have access to this party');
+}
+
+export function contractListWhere(
+  actor: PublicUser,
+): Prisma.ContractWhereInput {
+  const notDeleted: Prisma.ContractWhereInput = { deletedAt: null };
+
+  if (isAdmin(actor)) {
+    return notDeleted;
+  }
+
+  return { ...notDeleted, organizationId: requireOrganizationId(actor) };
+}
+
+export function assertCanAccessContract(
+  actor: PublicUser,
+  contract: { organizationId: string },
+): void {
+  if (isAdmin(actor)) {
+    return;
+  }
+
+  if (actor.organizationId === contract.organizationId) {
+    return;
+  }
+
+  throw new ForbiddenException('You do not have access to this contract');
+}
+
+/**
+ * Organization list / access:
+ * - ADMIN → all
+ * - OWNER → their organization only
+ * - others → forbidden for list; no org management
+ */
+export function organizationListWhere(
+  actor: PublicUser,
+): Prisma.OrganizationWhereInput {
+  if (isAdmin(actor)) {
+    return {};
+  }
+
+  if (isOwner(actor)) {
+    return { id: requireOrganizationId(actor) };
+  }
+
+  throw new ForbiddenException('You do not have access to organizations');
+}
+
+export function assertCanAccessOrganization(
+  actor: PublicUser,
+  organizationId: string,
+): void {
+  if (isAdmin(actor)) {
+    return;
+  }
+
+  if (isOwner(actor) && actor.organizationId === organizationId) {
+    return;
+  }
+
+  throw new ForbiddenException('You do not have access to this organization');
 }
 
 /**
@@ -157,7 +266,7 @@ export function resolveScopedOrganizationId(
     return requestedOrganizationId;
   }
 
-  return actor.organizationId;
+  return requireOrganizationId(actor);
 }
 
 /**
@@ -184,46 +293,14 @@ export function resolveScopedOwnerId(
   return actor.id;
 }
 
-/**
- * Prisma `where` for listing clients:
- * - ADMIN → all (non-deleted)
- * - OWNER → organization clients
- * - others → clients they own (ownerId)
- */
-export function clientListWhere(actor: PublicUser): Prisma.ClientWhereInput {
-  const notDeleted: Prisma.ClientWhereInput = { deletedAt: null };
-
-  if (isAdmin(actor)) {
-    return notDeleted;
+/** Non-admin users must belong to an organization. */
+export function requireOrganizationId(actor: PublicUser): string {
+  if (!actor.organizationId) {
+    throw new ForbiddenException(
+      'Only platform admins may have a null organizationId',
+    );
   }
-
-  if (isOwner(actor)) {
-    return { ...notDeleted, organizationId: actor.organizationId };
-  }
-
-  return { ...notDeleted, ownerId: actor.id };
-}
-
-/**
- * Ensures actor may access a client record.
- */
-export function assertCanAccessClient(
-  actor: PublicUser,
-  client: { ownerId: string; organizationId: string },
-): void {
-  if (isAdmin(actor)) {
-    return;
-  }
-
-  if (isOwner(actor) && actor.organizationId === client.organizationId) {
-    return;
-  }
-
-  if (actor.id === client.ownerId) {
-    return;
-  }
-
-  throw new ForbiddenException('You do not have access to this client');
+  return actor.organizationId;
 }
 
 /** @deprecated use resolveScopedOrganizationId */

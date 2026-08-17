@@ -37,7 +37,7 @@ export class PropertiesController {
   @ApiOperation({
     summary: 'Create property',
     description:
-      'Creates a listing. Non-admins are scoped to their organization. ownerId defaults to the current user.',
+      'Creates a property with optional nested address and deedInfo. Non-admins are scoped to their organization.',
   })
   @ApiResponse({
     status: 201,
@@ -61,7 +61,7 @@ export class PropertiesController {
   @ApiOperation({
     summary: 'List properties',
     description:
-      'Admin: all. Owner: organization listings. Others: listings they own.',
+      'Admin: all. Owner: organization properties. Others: properties they own.',
   })
   @ApiResponse({
     status: 200,
@@ -117,7 +117,7 @@ export class PropertiesController {
   @Delete(':id')
   @ApiOperation({
     summary: 'Soft-delete property',
-    description: 'Sets deletedAt and marks the listing OFF_MARKET.',
+    description: 'Sets deletedAt on the property.',
   })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({

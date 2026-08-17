@@ -1,9 +1,27 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ListingType,
-  PropertyStatus,
-  PropertyType,
-} from '@prisma/client';
+import { PropertyType } from '@prisma/client';
+import { AddressResponseDto } from '../../common/dto/address-response.dto';
+
+export class DeedInfoResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  propertyId!: string;
+
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: true,
+    description: 'Opaque structured deed payload',
+  })
+  data!: Record<string, unknown>;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  updatedAt!: Date;
+}
 
 export class PropertyResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -24,50 +42,11 @@ export class PropertyResponseDto {
   @ApiProperty({ enum: PropertyType })
   propertyType!: PropertyType;
 
-  @ApiProperty({ enum: ListingType })
-  listingType!: ListingType;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  addressId!: string | null;
 
-  @ApiProperty({ enum: PropertyStatus })
-  status!: PropertyStatus;
-
-  @ApiProperty()
-  address!: string;
-
-  @ApiProperty()
-  city!: string;
-
-  @ApiPropertyOptional({ nullable: true })
-  district!: string | null;
-
-  @ApiProperty()
-  country!: string;
-
-  @ApiPropertyOptional({ nullable: true })
-  postalCode!: string | null;
-
-  @ApiPropertyOptional({ nullable: true })
-  latitude!: number | null;
-
-  @ApiPropertyOptional({ nullable: true })
-  longitude!: number | null;
-
-  @ApiProperty({
-    description: 'Decimal serialized as string',
-    example: '15000000000',
-  })
-  price!: string;
-
-  @ApiProperty()
-  currency!: string;
-
-  @ApiPropertyOptional({ nullable: true })
-  bedrooms!: number | null;
-
-  @ApiPropertyOptional({ nullable: true })
-  bathrooms!: number | null;
-
-  @ApiPropertyOptional({ nullable: true })
-  parkingSpots!: number | null;
+  @ApiPropertyOptional({ type: AddressResponseDto, nullable: true })
+  address!: AddressResponseDto | null;
 
   @ApiPropertyOptional({ nullable: true })
   areaSqm!: number | null;
@@ -82,13 +61,29 @@ export class PropertyResponseDto {
   yearBuilt!: number | null;
 
   @ApiPropertyOptional({ nullable: true })
+  bedrooms!: number | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  bathrooms!: number | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  parkingSpots!: number | null;
+
+  @ApiPropertyOptional({ nullable: true })
   furnished!: boolean | null;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    nullable: true,
+  })
+  facilities!: Record<string, unknown> | null;
 
   @ApiPropertyOptional({ nullable: true })
   referenceCode!: string | null;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
-  publishedAt!: Date | null;
+  @ApiPropertyOptional({ type: DeedInfoResponseDto, nullable: true })
+  deedInfo!: DeedInfoResponseDto | null;
 
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   deletedAt!: Date | null;

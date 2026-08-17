@@ -19,19 +19,28 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto, res: Response): Promise<PublicUser> {
-    const organization = await this.prisma.organization.findUnique({
-      where: { slug: dto.organizationSlug },
-    });
+    let user: PublicUser;
 
-    if (!organization) {
-      throw new UnauthorizedException('Invalid credentials');
+    if (dto.organizationSlug) {
+      const organization = await this.prisma.organization.findUnique({
+        where: { slug: dto.organizationSlug },
+      });
+
+      if (!organization) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      user = await this.usersService.validateCredentials(
+        organization.id,
+        dto.email,
+        dto.password,
+      );
+    } else {
+      user = await this.usersService.validateAdminCredentials(
+        dto.email,
+        dto.password,
+      );
     }
-
-    const user = await this.usersService.validateCredentials(
-      organization.id,
-      dto.email,
-      dto.password,
-    );
 
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + SESSION_MAX_AGE_MS);

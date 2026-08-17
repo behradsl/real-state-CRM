@@ -5,17 +5,19 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  IsUUID,
   MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
     description:
-      'Organization this user belongs to. Ignored for OWNER (forced to their org). Required for ADMIN.',
+      'Organization this user belongs to. Required for ADMIN when creating non-admin users. Ignored for OWNER (forced to their org). Omit when ADMIN creates another ADMIN.',
   })
-  @IsString()
-  organizationId!: string;
+  @IsOptional()
+  @IsUUID()
+  organizationId?: string;
 
   @ApiProperty({ example: 'agent@agency.com' })
   @IsEmail()

@@ -1,19 +1,19 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ListingType,
-  PropertyStatus,
-  PropertyType,
-} from '@prisma/client';
+import { PropertyType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { CreateAddressDto } from '../../common/dto/create-address.dto';
+import { CreateDeedInfoDto } from './create-property.dto';
 
 export class UpdatePropertyDto {
   @ApiPropertyOptional({
@@ -39,85 +39,16 @@ export class UpdatePropertyDto {
   @IsEnum(PropertyType)
   propertyType?: PropertyType;
 
-  @ApiPropertyOptional({ enum: ListingType })
+  @ApiPropertyOptional({ type: CreateAddressDto })
   @IsOptional()
-  @IsEnum(ListingType)
-  listingType?: ListingType;
+  @ValidateNested()
+  @Type(() => CreateAddressDto)
+  address?: CreateAddressDto;
 
-  @ApiPropertyOptional({ enum: PropertyStatus })
+  @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
-  @IsEnum(PropertyStatus)
-  status?: PropertyStatus;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  address?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  city?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  district?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  country?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  postalCode?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  latitude?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  longitude?: number;
-
-  @ApiPropertyOptional({ example: 15000000000 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  price?: number;
-
-  @ApiPropertyOptional({ example: 'IRR' })
-  @IsOptional()
-  @IsString()
-  currency?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  bedrooms?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  bathrooms?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  parkingSpots?: number;
+  @IsUUID()
+  addressId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -146,11 +77,46 @@ export class UpdatePropertyDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  bedrooms?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  bathrooms?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  parkingSpots?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsBoolean()
   furnished?: boolean;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+  })
+  @IsOptional()
+  @IsObject()
+  facilities?: Record<string, unknown>;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   referenceCode?: string;
+
+  @ApiPropertyOptional({ type: CreateDeedInfoDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateDeedInfoDto)
+  deedInfo?: CreateDeedInfoDto;
 }

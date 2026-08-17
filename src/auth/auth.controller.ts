@@ -41,7 +41,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Log in',
     description:
-      'Validates credentials and sets an httpOnly session cookie (`session_token`).',
+      'Validates credentials and sets an httpOnly session cookie (`session_token`). Provide `organizationSlug` for org users; omit it to log in as a platform ADMIN (email only, organizationId null).',
   })
   @ApiResponse({
     status: 201,

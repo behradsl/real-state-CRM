@@ -1,13 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'acme-realty',
-    description: 'Organization slug used at login',
+    description:
+      'Organization slug. When omitted, login looks up an active platform ADMIN by email (organizationId null).',
   })
+  @IsOptional()
   @IsString()
-  organizationSlug!: string;
+  organizationSlug?: string;
 
   @ApiProperty({ example: 'agent@agency.com' })
   @IsEmail()

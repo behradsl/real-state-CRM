@@ -1,19 +1,28 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ListingType,
-  PropertyStatus,
-  PropertyType,
-} from '@prisma/client';
+import { PropertyType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { CreateAddressDto } from '../../common/dto/create-address.dto';
+
+export class CreateDeedInfoDto {
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: true,
+    description: 'Opaque structured deed payload from the frontend',
+  })
+  @IsObject()
+  data!: Record<string, unknown>;
+}
 
 export class CreatePropertyDto {
   @ApiPropertyOptional({
@@ -46,82 +55,16 @@ export class CreatePropertyDto {
   @IsEnum(PropertyType)
   propertyType!: PropertyType;
 
-  @ApiPropertyOptional({ enum: ListingType, default: ListingType.SALE })
+  @ApiPropertyOptional({ type: CreateAddressDto })
   @IsOptional()
-  @IsEnum(ListingType)
-  listingType?: ListingType;
+  @ValidateNested()
+  @Type(() => CreateAddressDto)
+  address?: CreateAddressDto;
 
-  @ApiPropertyOptional({ enum: PropertyStatus, default: PropertyStatus.DRAFT })
+  @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
-  @IsEnum(PropertyStatus)
-  status?: PropertyStatus;
-
-  @ApiProperty({ example: 'Valiasr St. 12' })
-  @IsString()
-  address!: string;
-
-  @ApiProperty({ example: 'Tehran' })
-  @IsString()
-  city!: string;
-
-  @ApiPropertyOptional({ example: 'Vanak' })
-  @IsOptional()
-  @IsString()
-  district?: string;
-
-  @ApiPropertyOptional({ example: 'Iran', default: 'Iran' })
-  @IsOptional()
-  @IsString()
-  country?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  postalCode?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  latitude?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  longitude?: number;
-
-  @ApiProperty({ example: 15000000000, description: 'Price amount' })
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  price!: number;
-
-  @ApiPropertyOptional({ example: 'IRR', default: 'IRR' })
-  @IsOptional()
-  @IsString()
-  currency?: string;
-
-  @ApiPropertyOptional({ example: 2 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  bedrooms?: number;
-
-  @ApiPropertyOptional({ example: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  bathrooms?: number;
-
-  @ApiPropertyOptional({ example: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  parkingSpots?: number;
+  @IsUUID()
+  addressId?: string;
 
   @ApiPropertyOptional({ example: 95 })
   @IsOptional()
@@ -148,13 +91,49 @@ export class CreatePropertyDto {
   @IsNumber()
   yearBuilt?: number;
 
+  @ApiPropertyOptional({ example: 2 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  bedrooms?: number;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  bathrooms?: number;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  parkingSpots?: number;
+
   @ApiPropertyOptional({ example: false })
   @IsOptional()
   @IsBoolean()
   furnished?: boolean;
 
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    description: 'Opaque facilities object',
+  })
+  @IsOptional()
+  @IsObject()
+  facilities?: Record<string, unknown>;
+
   @ApiPropertyOptional({ example: 'APT-1001' })
   @IsOptional()
   @IsString()
   referenceCode?: string;
+
+  @ApiPropertyOptional({ type: CreateDeedInfoDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateDeedInfoDto)
+  deedInfo?: CreateDeedInfoDto;
 }

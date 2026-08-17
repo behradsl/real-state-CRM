@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, PropertyStatus } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import {
   assertCanAccessProperty,
   isAdmin,
@@ -25,37 +25,27 @@ const propertySelect = {
   title: true,
   description: true,
   propertyType: true,
-  listingType: true,
-  status: true,
+  addressId: true,
   address: true,
-  city: true,
-  district: true,
-  country: true,
-  postalCode: true,
-  latitude: true,
-  longitude: true,
-  price: true,
-  currency: true,
-  bedrooms: true,
-  bathrooms: true,
-  parkingSpots: true,
   areaSqm: true,
   floor: true,
   totalFloors: true,
   yearBuilt: true,
+  bedrooms: true,
+  bathrooms: true,
+  parkingSpots: true,
   furnished: true,
+  facilities: true,
   referenceCode: true,
-  publishedAt: true,
+  deedInfo: true,
   deletedAt: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.PropertySelect;
 
-type PropertyRecord = Prisma.PropertyGetPayload<{
+export type PublicProperty = Prisma.PropertyGetPayload<{
   select: typeof propertySelect;
 }>;
-
-export type PublicProperty = Omit<PropertyRecord, 'price'> & { price: string };
 
 @Injectable()
 export class PropertiesService {
@@ -74,55 +64,64 @@ export class PropertiesService {
     await this.assertAssigneeInOrganization(ownerId, organizationId);
 
     try {
-      const created = await this.prisma.property.create({
-        data: {
-          organizationId,
-          ownerId,
-          title: dto.title,
-          description: dto.description,
-          propertyType: dto.propertyType,
-          listingType: dto.listingType,
-          status: dto.status,
-          address: dto.address,
-          city: dto.city,
-          district: dto.district,
-          country: dto.country,
-          postalCode: dto.postalCode,
-          latitude: dto.latitude,
-          longitude: dto.longitude,
-          price: dto.price,
-          currency: dto.currency,
-          bedrooms: dto.bedrooms,
-          bathrooms: dto.bathrooms,
-          parkingSpots: dto.parkingSpots,
-          areaSqm: dto.areaSqm,
-          floor: dto.floor,
-          totalFloors: dto.totalFloors,
-          yearBuilt: dto.yearBuilt,
-          furnished: dto.furnished,
-          referenceCode: dto.referenceCode,
-          publishedAt:
-            dto.status && dto.status !== PropertyStatus.DRAFT
-              ? new Date()
-              : undefined,
-        },
-        select: propertySelect,
-      });
+      return await this.prisma.$transaction(async (tx) => {
+        let addressId = dto.addressId;
 
-      return this.toPublic(created);
+        if (dto.address) {
+          const address = await tx.address.create({
+            data: {
+              province: dto.address.province,
+              city: dto.address.city,
+              details: dto.address.details,
+              plaque: dto.address.plaque,
+              postalCode: dto.address.postalCode,
+              latitude: dto.address.latitude,
+              longitude: dto.address.longitude,
+            },
+          });
+          addressId = address.id;
+        }
+
+        return tx.property.create({
+          data: {
+            organizationId,
+            ownerId,
+            title: dto.title,
+            description: dto.description,
+            propertyType: dto.propertyType,
+            addressId,
+            areaSqm: dto.areaSqm,
+            floor: dto.floor,
+            totalFloors: dto.totalFloors,
+            yearBuilt: dto.yearBuilt,
+            bedrooms: dto.bedrooms,
+            bathrooms: dto.bathrooms,
+            parkingSpots: dto.parkingSpots,
+            furnished: dto.furnished,
+            facilities: dto.facilities as Prisma.InputJsonValue | undefined,
+            referenceCode: dto.referenceCode,
+            deedInfo: dto.deedInfo
+              ? {
+                  create: {
+                    data: dto.deedInfo.data as Prisma.InputJsonValue,
+                  },
+                }
+              : undefined,
+          },
+          select: propertySelect,
+        });
+      });
     } catch (error) {
       this.handlePrismaError(error);
     }
   }
 
-  async findAll(actor: PublicUser): Promise<PublicProperty[]> {
-    const rows = await this.prisma.property.findMany({
+  findAll(actor: PublicUser): Promise<PublicProperty[]> {
+    return this.prisma.property.findMany({
       where: propertyListWhere(actor),
       select: propertySelect,
       orderBy: { createdAt: 'desc' },
     });
-
-    return rows.map((row) => this.toPublic(row));
   }
 
   async findOne(actor: PublicUser, id: string): Promise<PublicProperty> {
@@ -136,7 +135,7 @@ export class PropertiesService {
     }
 
     assertCanAccessProperty(actor, property);
-    return this.toPublic(property);
+    return property;
   }
 
   async update(
@@ -164,48 +163,71 @@ export class PropertiesService {
       await this.assertAssigneeInOrganization(ownerId, existing.organizationId);
     }
 
-    const data: Prisma.PropertyUpdateInput = {
-      title: dto.title,
-      description: dto.description,
-      propertyType: dto.propertyType,
-      listingType: dto.listingType,
-      status: dto.status,
-      address: dto.address,
-      city: dto.city,
-      district: dto.district,
-      country: dto.country,
-      postalCode: dto.postalCode,
-      latitude: dto.latitude,
-      longitude: dto.longitude,
-      price: dto.price,
-      currency: dto.currency,
-      bedrooms: dto.bedrooms,
-      bathrooms: dto.bathrooms,
-      parkingSpots: dto.parkingSpots,
-      areaSqm: dto.areaSqm,
-      floor: dto.floor,
-      totalFloors: dto.totalFloors,
-      yearBuilt: dto.yearBuilt,
-      furnished: dto.furnished,
-      referenceCode: dto.referenceCode,
-      owner: dto.ownerId !== undefined ? { connect: { id: ownerId } } : undefined,
-    };
-
-    if (
-      dto.status &&
-      dto.status !== PropertyStatus.DRAFT &&
-      !existing.publishedAt
-    ) {
-      data.publishedAt = new Date();
-    }
-
     try {
-      const updated = await this.prisma.property.update({
-        where: { id },
-        data,
-        select: propertySelect,
+      return await this.prisma.$transaction(async (tx) => {
+        let addressId = dto.addressId;
+
+        if (dto.address) {
+          const address = await tx.address.create({
+            data: {
+              province: dto.address.province,
+              city: dto.address.city,
+              details: dto.address.details,
+              plaque: dto.address.plaque,
+              postalCode: dto.address.postalCode,
+              latitude: dto.address.latitude,
+              longitude: dto.address.longitude,
+            },
+          });
+          addressId = address.id;
+        }
+
+        if (dto.deedInfo) {
+          await tx.deedInfo.upsert({
+            where: { propertyId: id },
+            create: {
+              propertyId: id,
+              data: dto.deedInfo.data as Prisma.InputJsonValue,
+            },
+            update: {
+              data: dto.deedInfo.data as Prisma.InputJsonValue,
+            },
+          });
+        }
+
+        const data: Prisma.PropertyUncheckedUpdateInput = {
+          title: dto.title,
+          description: dto.description,
+          propertyType: dto.propertyType,
+          areaSqm: dto.areaSqm,
+          floor: dto.floor,
+          totalFloors: dto.totalFloors,
+          yearBuilt: dto.yearBuilt,
+          bedrooms: dto.bedrooms,
+          bathrooms: dto.bathrooms,
+          parkingSpots: dto.parkingSpots,
+          furnished: dto.furnished,
+          facilities:
+            dto.facilities === undefined
+              ? undefined
+              : (dto.facilities as Prisma.InputJsonValue),
+          referenceCode: dto.referenceCode,
+        };
+
+        if (addressId !== undefined) {
+          data.addressId = addressId;
+        }
+
+        if (dto.ownerId !== undefined) {
+          data.ownerId = ownerId;
+        }
+
+        return tx.property.update({
+          where: { id },
+          data,
+          select: propertySelect,
+        });
       });
-      return this.toPublic(updated);
     } catch (error) {
       this.handlePrismaError(error);
     }
@@ -223,16 +245,11 @@ export class PropertiesService {
 
     assertCanAccessProperty(actor, existing);
 
-    const deleted = await this.prisma.property.update({
+    return this.prisma.property.update({
       where: { id },
-      data: {
-        deletedAt: new Date(),
-        status: PropertyStatus.OFF_MARKET,
-      },
+      data: { deletedAt: new Date() },
       select: propertySelect,
     });
-
-    return this.toPublic(deleted);
   }
 
   private async assertAssigneeInOrganization(
@@ -255,13 +272,6 @@ export class PropertiesService {
     }
   }
 
-  private toPublic(row: PropertyRecord): PublicProperty {
-    return {
-      ...row,
-      price: row.price.toString(),
-    };
-  }
-
   private handlePrismaError(error: unknown): never {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -276,7 +286,7 @@ export class PropertiesService {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2003'
     ) {
-      throw new NotFoundException('Related organization or user not found');
+      throw new NotFoundException('Related organization, user, or address not found');
     }
 
     throw error;

@@ -47,6 +47,7 @@ export class UsersService {
     const organizationId = resolveCreateUserOrganizationId(
       actor,
       dto.organizationId,
+      dto.role,
     );
     assertCanAssignRole(actor, dto.role);
 
@@ -166,6 +167,32 @@ export class UsersService {
     });
 
     if (!user || !user.isActive) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const matches = await comparePassword(password, user.passwordHash);
+    if (!matches) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const { passwordHash: _, ...publicUser } = user;
+    return publicUser;
+  }
+
+  async validateAdminCredentials(
+    email: string,
+    password: string,
+  ): Promise<PublicUser> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email,
+        role: UserRole.ADMIN,
+        organizationId: null,
+        isActive: true,
+      },
+    });
+
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 

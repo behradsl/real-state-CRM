@@ -39,7 +39,7 @@ export class UsersController {
   @ApiOperation({
     summary: 'Create user',
     description:
-      'Admin: any organization. Owner: only their organization (cannot create ADMIN).',
+      'Admin: pass organizationId for non-admin users; omit for ADMIN. Owner: forced to their organization (cannot create ADMIN).',
   })
   @ApiResponse({
     status: 201,
