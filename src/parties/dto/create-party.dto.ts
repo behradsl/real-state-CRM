@@ -25,67 +25,71 @@ export class CreatePartyDto {
   @IsEnum(PartyType)
   type!: PartyType;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'علی' })
   @IsOptional()
   @IsString()
   firstName?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'محمدی' })
   @IsOptional()
   @IsString()
   lastName?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '0012345678' })
   @IsOptional()
   @IsString()
   nationalCode?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '12345678901' })
   @IsOptional()
   @IsString()
   economicCode?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'شرکت نمونه' })
   @IsOptional()
   @IsString()
   companyName?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    example: '1990-05-12T00:00:00.000Z',
+  })
   @IsOptional()
   @IsDateString()
   birthDate?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'همدان' })
   @IsOptional()
   @IsString()
   birthPlace?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'همدان' })
   @IsOptional()
   @IsString()
   identityExportPlace?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'حسین' })
   @IsOptional()
   @IsString()
   fatherName?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '123456' })
   @IsOptional()
   @IsString()
   identityNumber?: string;
 
-  @ApiPropertyOptional({ enum: Gender })
+  @ApiPropertyOptional({ enum: Gender, example: Gender.MALE })
   @IsOptional()
   @IsEnum(Gender)
   gender?: Gender;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '09121234567' })
   @IsOptional()
   @IsString()
   phone?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'ali@example.com' })
   @IsOptional()
   @IsEmail()
   email?: string;

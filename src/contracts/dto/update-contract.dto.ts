@@ -10,73 +10,74 @@ import {
   IsString,
   Min,
 } from 'class-validator';
+import { saleTermsExample } from '../../common/swagger/json-examples';
 
 export class UpdateContractDto {
-  @ApiPropertyOptional({ enum: ContractType })
+  @ApiPropertyOptional({ enum: ContractType, example: ContractType.SALE })
   @IsOptional()
   @IsEnum(ContractType)
   contractType?: ContractType;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'CNT-2026-001' })
   @IsOptional()
   @IsString()
   contractNumber?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'مبایعه نامه آپارتمان' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 1.5 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   commissionPercentage?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 225000000 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   commissionAmount?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 9 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   taxPercentage?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 20250000 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   taxAmount?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 0.75 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   firstPartyCommissionPercentage?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 112500000 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   firstPartyCommissionAmount?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 0.75 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   secondPartyCommissionPercentage?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 112500000 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
@@ -86,12 +87,19 @@ export class UpdateContractDto {
   @ApiPropertyOptional({
     type: 'object',
     additionalProperties: true,
+    description:
+      'Frontend-owned terms by contract type. Shape is not validated by the API.',
+    example: saleTermsExample,
   })
   @IsOptional()
   @IsObject()
   termsAndConditions?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    example: '2026-03-20T12:00:00.000Z',
+  })
   @IsOptional()
   @IsDateString()
   signedAt?: string;

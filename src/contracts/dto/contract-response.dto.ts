@@ -1,5 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ContractPartyRole, ContractType } from '@prisma/client';
+import {
+  saleTermsExample,
+  signatureDataExample,
+} from '../../common/swagger/json-examples';
 import { PartyResponseDto } from '../../parties/dto/party-response.dto';
 import { PropertyResponseDto } from '../../properties/dto/property-response.dto';
 
@@ -40,6 +44,7 @@ export class ContractSignatureResponseDto {
     type: 'object',
     additionalProperties: true,
     nullable: true,
+    example: signatureDataExample,
   })
   data!: Record<string, unknown> | null;
 
@@ -66,57 +71,65 @@ export class ContractResponseDto {
   @ApiProperty({ enum: ContractType })
   contractType!: ContractType;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'CNT-2026-001' })
   contractNumber!: string;
 
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ nullable: true, example: 'مبایعه نامه آپارتمان' })
   description!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
     nullable: true,
+    example: '1.5',
   })
   commissionPercentage!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
     nullable: true,
+    example: '225000000',
   })
   commissionAmount!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
     nullable: true,
+    example: '9',
   })
   taxPercentage!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
     nullable: true,
+    example: '20250000',
   })
   taxAmount!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
     nullable: true,
+    example: '0.75',
   })
   firstPartyCommissionPercentage!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
     nullable: true,
+    example: '112500000',
   })
   firstPartyCommissionAmount!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
     nullable: true,
+    example: '0.75',
   })
   secondPartyCommissionPercentage!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
     nullable: true,
+    example: '112500000',
   })
   secondPartyCommissionAmount!: string | null;
 
@@ -124,6 +137,7 @@ export class ContractResponseDto {
     type: 'object',
     additionalProperties: true,
     nullable: true,
+    example: saleTermsExample,
   })
   termsAndConditions!: Record<string, unknown> | null;
 

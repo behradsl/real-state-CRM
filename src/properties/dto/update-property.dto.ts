@@ -13,6 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateAddressDto } from '../../common/dto/create-address.dto';
+import { facilitiesExample } from '../../common/swagger/json-examples';
 import { CreateDeedInfoDto } from './create-property.dto';
 
 export class UpdatePropertyDto {
@@ -104,6 +105,9 @@ export class UpdatePropertyDto {
   @ApiPropertyOptional({
     type: 'object',
     additionalProperties: true,
+    description:
+      'Frontend-owned facilities payload. Shape is not validated by the API.',
+    example: facilitiesExample,
   })
   @IsOptional()
   @IsObject()

@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PropertyType } from '@prisma/client';
 import { AddressResponseDto } from '../../common/dto/address-response.dto';
+import {
+  deedInfoExample,
+  facilitiesExample,
+} from '../../common/swagger/json-examples';
 
 export class DeedInfoResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -12,7 +16,8 @@ export class DeedInfoResponseDto {
   @ApiProperty({
     type: 'object',
     additionalProperties: true,
-    description: 'Opaque structured deed payload',
+    description: 'Frontend-owned deed payload',
+    example: deedInfoExample,
   })
   data!: Record<string, unknown>;
 
@@ -76,6 +81,7 @@ export class PropertyResponseDto {
     type: 'object',
     additionalProperties: true,
     nullable: true,
+    example: facilitiesExample,
   })
   facilities!: Record<string, unknown> | null;
 

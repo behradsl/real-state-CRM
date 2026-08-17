@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBody,
   ApiCookieAuth,
   ApiForbiddenResponse,
   ApiOperation,
@@ -20,6 +21,7 @@ import { SESSION_COOKIE_NAME } from '../auth/auth.constants';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { createContractBodyExamples } from '../common/swagger/json-examples';
 import { PublicUser } from '../users/users.service';
 import { ContractsService } from './contracts.service';
 import { CreateContractSignatureDto } from './dto/create-contract-signature.dto';
@@ -41,7 +43,11 @@ export class ContractsController {
   @ApiOperation({
     summary: 'Create contract',
     description:
-      'Creates a contract and ContractParty rows. Property and parties must share the same organization.',
+      'Creates a contract and ContractParty rows. Property and parties must share the same organization. Use the Examples dropdown for SALE / RENT / GOODWILL / PRE_SALE / MUTUAL_RESCISSION / CONSTRUCTION_JOINT_VENTURE termsAndConditions samples.',
+  })
+  @ApiBody({
+    type: CreateContractDto,
+    examples: createContractBodyExamples,
   })
   @ApiResponse({
     status: 201,

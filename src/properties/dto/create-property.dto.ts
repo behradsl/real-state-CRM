@@ -13,12 +13,18 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateAddressDto } from '../../common/dto/create-address.dto';
+import {
+  deedInfoExample,
+  facilitiesExample,
+} from '../../common/swagger/json-examples';
 
 export class CreateDeedInfoDto {
   @ApiProperty({
     type: 'object',
     additionalProperties: true,
-    description: 'Opaque structured deed payload from the frontend',
+    description:
+      'Frontend-owned deed payload (cadastral / registration fields). Shape is not validated by the API.',
+    example: deedInfoExample,
   })
   @IsObject()
   data!: Record<string, unknown>;
@@ -120,7 +126,9 @@ export class CreatePropertyDto {
   @ApiPropertyOptional({
     type: 'object',
     additionalProperties: true,
-    description: 'Opaque facilities object',
+    description:
+      'Frontend-owned facilities payload. Shape is not validated by the API.',
+    example: facilitiesExample,
   })
   @IsOptional()
   @IsObject()

@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBody,
   ApiCookieAuth,
   ApiForbiddenResponse,
   ApiOperation,
@@ -20,6 +21,7 @@ import { SESSION_COOKIE_NAME } from '../auth/auth.constants';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { createPropertyBodyExample } from '../common/swagger/json-examples';
 import { PublicUser } from '../users/users.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { PropertyResponseDto } from './dto/property-response.dto';
@@ -37,7 +39,11 @@ export class PropertiesController {
   @ApiOperation({
     summary: 'Create property',
     description:
-      'Creates a property with optional nested address and deedInfo. Non-admins are scoped to their organization.',
+      'Creates a property with optional nested address and deedInfo. Non-admins are scoped to their organization. deedInfo.data and facilities are frontend-owned JSON.',
+  })
+  @ApiBody({
+    type: CreatePropertyDto,
+    examples: createPropertyBodyExample,
   })
   @ApiResponse({
     status: 201,
