@@ -254,7 +254,16 @@ model Contract {
   secondPartyCommissionPercentage Decimal? @db.Decimal(14, 2)
   secondPartyCommissionAmount     Decimal? @db.Decimal(14, 2)
 
-  /// Structured by frontend (clauses, duration, etc.)
+  /// CRM-queryable financial / schedule fields (denormalized from terms forms)
+  totalAmount      Decimal?  @db.Decimal(18, 2)
+  monthlyAmount    Decimal?  @db.Decimal(18, 2)
+  depositAmount    Decimal?  @db.Decimal(18, 2)
+  startDate        DateTime?
+  endDate          DateTime?
+  deliveryDate     DateTime?
+  officialDeedDate DateTime?
+
+  /// Structured by frontend (clauses, payment banks, form-only details)
   termsAndConditions Json?
 
   signedAt  DateTime?

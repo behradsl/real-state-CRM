@@ -84,6 +84,47 @@ export class UpdateContractDto {
   @Min(0)
   secondPartyCommissionAmount?: number;
 
+  @ApiPropertyOptional({ example: 15000000000 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  totalAmount?: number;
+
+  @ApiPropertyOptional({ example: 100000000 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  monthlyAmount?: number;
+
+  @ApiPropertyOptional({ example: 500000000 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  depositAmount?: number;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  deliveryDate?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  officialDeedDate?: string;
+
   @ApiPropertyOptional({
     type: 'object',
     additionalProperties: true,

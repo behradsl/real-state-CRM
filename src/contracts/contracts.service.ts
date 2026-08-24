@@ -32,6 +32,13 @@ const contractSelect = {
   firstPartyCommissionAmount: true,
   secondPartyCommissionPercentage: true,
   secondPartyCommissionAmount: true,
+  totalAmount: true,
+  monthlyAmount: true,
+  depositAmount: true,
+  startDate: true,
+  endDate: true,
+  deliveryDate: true,
+  officialDeedDate: true,
   termsAndConditions: true,
   signedAt: true,
   deletedAt: true,
@@ -65,7 +72,10 @@ type DecimalField =
   | 'firstPartyCommissionPercentage'
   | 'firstPartyCommissionAmount'
   | 'secondPartyCommissionPercentage'
-  | 'secondPartyCommissionAmount';
+  | 'secondPartyCommissionAmount'
+  | 'totalAmount'
+  | 'monthlyAmount'
+  | 'depositAmount';
 
 export type PublicContract = Omit<ContractRecord, DecimalField> &
   Record<DecimalField, string | null>;
@@ -117,6 +127,17 @@ export class ContractsService {
           firstPartyCommissionAmount: dto.firstPartyCommissionAmount,
           secondPartyCommissionPercentage: dto.secondPartyCommissionPercentage,
           secondPartyCommissionAmount: dto.secondPartyCommissionAmount,
+          totalAmount: dto.totalAmount,
+          monthlyAmount: dto.monthlyAmount,
+          depositAmount: dto.depositAmount,
+          startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+          endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+          deliveryDate: dto.deliveryDate
+            ? new Date(dto.deliveryDate)
+            : undefined,
+          officialDeedDate: dto.officialDeedDate
+            ? new Date(dto.officialDeedDate)
+            : undefined,
           termsAndConditions: dto.termsAndConditions as
             | Prisma.InputJsonValue
             | undefined,
@@ -177,6 +198,33 @@ export class ContractsService {
           firstPartyCommissionAmount: dto.firstPartyCommissionAmount,
           secondPartyCommissionPercentage: dto.secondPartyCommissionPercentage,
           secondPartyCommissionAmount: dto.secondPartyCommissionAmount,
+          totalAmount: dto.totalAmount,
+          monthlyAmount: dto.monthlyAmount,
+          depositAmount: dto.depositAmount,
+          startDate:
+            dto.startDate === undefined
+              ? undefined
+              : dto.startDate
+                ? new Date(dto.startDate)
+                : null,
+          endDate:
+            dto.endDate === undefined
+              ? undefined
+              : dto.endDate
+                ? new Date(dto.endDate)
+                : null,
+          deliveryDate:
+            dto.deliveryDate === undefined
+              ? undefined
+              : dto.deliveryDate
+                ? new Date(dto.deliveryDate)
+                : null,
+          officialDeedDate:
+            dto.officialDeedDate === undefined
+              ? undefined
+              : dto.officialDeedDate
+                ? new Date(dto.officialDeedDate)
+                : null,
           termsAndConditions:
             dto.termsAndConditions === undefined
               ? undefined
@@ -313,6 +361,9 @@ export class ContractsService {
       secondPartyCommissionAmount: this.decimalToString(
         row.secondPartyCommissionAmount,
       ),
+      totalAmount: this.decimalToString(row.totalAmount),
+      monthlyAmount: this.decimalToString(row.monthlyAmount),
+      depositAmount: this.decimalToString(row.depositAmount),
     };
   }
 

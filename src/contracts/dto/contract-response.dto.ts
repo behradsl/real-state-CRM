@@ -134,6 +134,39 @@ export class ContractResponseDto {
   secondPartyCommissionAmount!: string | null;
 
   @ApiPropertyOptional({
+    description: 'Decimal serialized as string — total price / period rent',
+    nullable: true,
+    example: '15000000000',
+  })
+  totalAmount!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Decimal serialized as string — monthly rent',
+    nullable: true,
+    example: '100000000',
+  })
+  monthlyAmount!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Decimal serialized as string — deposit / security',
+    nullable: true,
+    example: '500000000',
+  })
+  depositAmount!: string | null;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  startDate!: Date | null;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  endDate!: Date | null;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  deliveryDate!: Date | null;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  officialDeedDate!: Date | null;
+
+  @ApiPropertyOptional({
     type: 'object',
     additionalProperties: true,
     nullable: true,

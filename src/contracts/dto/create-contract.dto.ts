@@ -3,6 +3,7 @@ import { ContractType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsDateString,
   IsEnum,
   IsNumber,
   IsObject,
@@ -97,6 +98,72 @@ export class CreateContractDto {
   @IsNumber()
   @Min(0)
   secondPartyCommissionAmount?: number;
+
+  @ApiPropertyOptional({
+    example: 15000000000,
+    description: 'CRM total price / total rent period amount (rials)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  totalAmount?: number;
+
+  @ApiPropertyOptional({
+    example: 100000000,
+    description: 'CRM monthly rent amount (rials)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  monthlyAmount?: number;
+
+  @ApiPropertyOptional({
+    example: 500000000,
+    description: 'CRM deposit / security amount (rials)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  depositAmount?: number;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    description: 'Contract / lease start date',
+  })
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    description: 'Contract / lease end date',
+  })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    description: 'Property delivery date',
+  })
+  @IsOptional()
+  @IsDateString()
+  deliveryDate?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    description: 'Official deed / notary transfer date',
+  })
+  @IsOptional()
+  @IsDateString()
+  officialDeedDate?: string;
 
   @ApiPropertyOptional({
     type: 'object',
