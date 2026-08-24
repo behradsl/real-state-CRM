@@ -35,7 +35,17 @@ const propertySelect = {
   bathrooms: true,
   parkingSpots: true,
   furnished: true,
-  facilities: true,
+  water: true,
+  electricity: true,
+  gas: true,
+  telephone: true,
+  parking: true,
+  parkingCount: true,
+  storage: true,
+  storageCount: true,
+  storageArea: true,
+  elevator: true,
+  otherFacilities: true,
   referenceCode: true,
   deedInfo: true,
   deletedAt: true,
@@ -96,14 +106,34 @@ export class PropertiesService {
             yearBuilt: dto.yearBuilt,
             bedrooms: dto.bedrooms,
             bathrooms: dto.bathrooms,
-            parkingSpots: dto.parkingSpots,
+            parkingSpots: dto.parkingSpots ?? dto.parkingCount,
             furnished: dto.furnished,
-            facilities: dto.facilities as Prisma.InputJsonValue | undefined,
+            water: dto.water,
+            electricity: dto.electricity,
+            gas: dto.gas,
+            telephone: dto.telephone,
+            parking: dto.parking,
+            parkingCount: dto.parkingCount ?? dto.parkingSpots,
+            storage: dto.storage,
+            storageCount: dto.storageCount,
+            storageArea: dto.storageArea,
+            elevator: dto.elevator,
+            otherFacilities:
+              dto.otherFacilities === undefined
+                ? undefined
+                : (dto.otherFacilities as unknown as Prisma.InputJsonValue),
             referenceCode: dto.referenceCode,
             deedInfo: dto.deedInfo
               ? {
                   create: {
-                    data: dto.deedInfo.data as Prisma.InputJsonValue,
+                    cadastralNumber: dto.deedInfo.cadastralNumber,
+                    subParcelNumber: dto.deedInfo.subParcelNumber,
+                    mainParcelNumber: dto.deedInfo.mainParcelNumber,
+                    plotNumber: dto.deedInfo.plotNumber,
+                    cadastralDistrict: dto.deedInfo.cadastralDistrict,
+                    registrationArea: dto.deedInfo.registrationArea,
+                    areaSqm: dto.deedInfo.areaSqm,
+                    postalCode: dto.deedInfo.postalCode,
                   },
                 }
               : undefined,
@@ -187,10 +217,24 @@ export class PropertiesService {
             where: { propertyId: id },
             create: {
               propertyId: id,
-              data: dto.deedInfo.data as Prisma.InputJsonValue,
+              cadastralNumber: dto.deedInfo.cadastralNumber,
+              subParcelNumber: dto.deedInfo.subParcelNumber,
+              mainParcelNumber: dto.deedInfo.mainParcelNumber,
+              plotNumber: dto.deedInfo.plotNumber,
+              cadastralDistrict: dto.deedInfo.cadastralDistrict,
+              registrationArea: dto.deedInfo.registrationArea,
+              areaSqm: dto.deedInfo.areaSqm,
+              postalCode: dto.deedInfo.postalCode,
             },
             update: {
-              data: dto.deedInfo.data as Prisma.InputJsonValue,
+              cadastralNumber: dto.deedInfo.cadastralNumber,
+              subParcelNumber: dto.deedInfo.subParcelNumber,
+              mainParcelNumber: dto.deedInfo.mainParcelNumber,
+              plotNumber: dto.deedInfo.plotNumber,
+              cadastralDistrict: dto.deedInfo.cadastralDistrict,
+              registrationArea: dto.deedInfo.registrationArea,
+              areaSqm: dto.deedInfo.areaSqm,
+              postalCode: dto.deedInfo.postalCode,
             },
           });
         }
@@ -205,12 +249,22 @@ export class PropertiesService {
           yearBuilt: dto.yearBuilt,
           bedrooms: dto.bedrooms,
           bathrooms: dto.bathrooms,
-          parkingSpots: dto.parkingSpots,
+          parkingSpots: dto.parkingSpots ?? dto.parkingCount,
           furnished: dto.furnished,
-          facilities:
-            dto.facilities === undefined
+          water: dto.water,
+          electricity: dto.electricity,
+          gas: dto.gas,
+          telephone: dto.telephone,
+          parking: dto.parking,
+          parkingCount: dto.parkingCount ?? dto.parkingSpots,
+          storage: dto.storage,
+          storageCount: dto.storageCount,
+          storageArea: dto.storageArea,
+          elevator: dto.elevator,
+          otherFacilities:
+            dto.otherFacilities === undefined
               ? undefined
-              : (dto.facilities as Prisma.InputJsonValue),
+              : (dto.otherFacilities as unknown as Prisma.InputJsonValue),
           referenceCode: dto.referenceCode,
         };
 

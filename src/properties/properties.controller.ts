@@ -39,7 +39,7 @@ export class PropertiesController {
   @ApiOperation({
     summary: 'Create property',
     description:
-      'Creates a property with optional nested address and deedInfo. Non-admins are scoped to their organization. deedInfo.data and facilities are frontend-owned JSON.',
+      'Creates a property with optional nested address, fixed facility columns, otherFacilities JSON array, and typed deedInfo. Non-admins are scoped to their organization.',
   })
   @ApiBody({
     type: CreatePropertyDto,

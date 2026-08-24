@@ -2,10 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PropertyType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -13,21 +13,59 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateAddressDto } from '../../common/dto/create-address.dto';
-import {
-  deedInfoExample,
-  facilitiesExample,
-} from '../../common/swagger/json-examples';
+
+export class OtherFacilityDto {
+  @ApiProperty({ example: 'گرمایش' })
+  @IsString()
+  name!: string;
+
+  @ApiProperty({ example: 'گرمایش از کف' })
+  @IsString()
+  kind!: string;
+}
 
 export class CreateDeedInfoDto {
-  @ApiProperty({
-    type: 'object',
-    additionalProperties: true,
-    description:
-      'Frontend-owned deed payload (cadastral / registration fields). Shape is not validated by the API.',
-    example: deedInfoExample,
-  })
-  @IsObject()
-  data!: Record<string, unknown>;
+  @ApiPropertyOptional({ example: '12345/67' })
+  @IsOptional()
+  @IsString()
+  cadastralNumber?: string;
+
+  @ApiPropertyOptional({ example: '67' })
+  @IsOptional()
+  @IsString()
+  subParcelNumber?: string;
+
+  @ApiPropertyOptional({ example: '12345' })
+  @IsOptional()
+  @IsString()
+  mainParcelNumber?: string;
+
+  @ApiPropertyOptional({ example: '12' })
+  @IsOptional()
+  @IsString()
+  plotNumber?: string;
+
+  @ApiPropertyOptional({ example: '11' })
+  @IsOptional()
+  @IsString()
+  cadastralDistrict?: string;
+
+  @ApiPropertyOptional({ example: 'همدان' })
+  @IsOptional()
+  @IsString()
+  registrationArea?: string;
+
+  @ApiPropertyOptional({ example: 120.5 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  areaSqm?: number;
+
+  @ApiPropertyOptional({ example: '6513112345' })
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
 }
 
 export class CreatePropertyDto {
@@ -123,16 +161,74 @@ export class CreatePropertyDto {
   @IsBoolean()
   furnished?: boolean;
 
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  water?: boolean;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  electricity?: boolean;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  gas?: boolean;
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  telephone?: boolean;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  parking?: boolean;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  parkingCount?: number;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  storage?: boolean;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  storageCount?: number;
+
+  @ApiPropertyOptional({ example: 15 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  storageArea?: number;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  elevator?: boolean;
+
   @ApiPropertyOptional({
-    type: 'object',
-    additionalProperties: true,
-    description:
-      'Frontend-owned facilities payload. Shape is not validated by the API.',
-    example: facilitiesExample,
+    type: [OtherFacilityDto],
+    example: [
+      { name: 'گرمایش', kind: 'گرمایش از کف' },
+      { name: 'کابینت', kind: 'MDF' },
+    ],
   })
   @IsOptional()
-  @IsObject()
-  facilities?: Record<string, unknown>;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OtherFacilityDto)
+  otherFacilities?: OtherFacilityDto[];
 
   @ApiPropertyOptional({ example: 'APT-1001' })
   @IsOptional()

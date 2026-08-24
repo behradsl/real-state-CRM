@@ -4,8 +4,9 @@ services:
     container_name: real-estate-crm-db
     restart: unless-stopped
     ports:
-      # Host 5433 avoids conflict with a local Postgres already on 5432
-      - "5433:5432"
+      # Host 15432 avoids Windows Hyper-V excluded ranges (5433-5532 is blocked)
+      # and the local Postgres already on 5432
+      - "15432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

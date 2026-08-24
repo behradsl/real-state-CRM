@@ -166,7 +166,20 @@ model Property {
   bathrooms    Int?
   parkingSpots Int?
   furnished    Boolean?
-  facilities   Json?
+
+  /// Fixed facilities (common to all properties)
+  water         Boolean?
+  electricity   Boolean?
+  gas           Boolean?
+  telephone     Boolean?
+  parking       Boolean?
+  parkingCount  Int?
+  storage       Boolean?
+  storageCount  Int?
+  storageArea   Float?
+  elevator      Boolean?
+  /// Extra facilities: [{ name: string, kind: string }, ...]
+  otherFacilities Json?
 
   referenceCode String?
   deletedAt     DateTime?
@@ -185,12 +198,18 @@ model Property {
 }
 
 model DeedInfo {
-  id         String   @id @default(uuid())
-  propertyId String   @unique
-  /// Structured by frontend
-  data       Json
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                String   @id @default(uuid())
+  propertyId        String   @unique
+  cadastralNumber   String?
+  subParcelNumber   String?
+  mainParcelNumber  String?
+  plotNumber        String?
+  cadastralDistrict String?
+  registrationArea  String?
+  areaSqm           Float?
+  postalCode        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }

@@ -4,7 +4,6 @@
  */
 
 export const deedInfoExample = {
-  shareUnits: 6,
   cadastralNumber: '12345/67',
   subParcelNumber: '67',
   mainParcelNumber: '12345',
@@ -15,23 +14,14 @@ export const deedInfoExample = {
   postalCode: '6513112345',
 };
 
-export const facilitiesExample = {
-  water: true,
-  electricity: true,
-  gas: true,
-  telephone: false,
-  parking: true,
-  parkingCount: 1,
-  storage: true,
-  storageCount: 1,
-  heating: 'PACKAGE_RADIATOR',
-  cooling: 'SPLIT',
-  elevator: true,
-  notes: 'کابینت MDF، کف سرامیک',
-};
+export const otherFacilitiesExample = [
+  { name: 'گرمایش', kind: 'گرمایش از کف' },
+  { name: 'کابینت', kind: 'MDF' },
+];
 
 export const saleTermsExample = {
   type: 'SALE',
+  shareUnits: 6,
   price: {
     totalRials: 15000000000,
     totalInWords: 'پانزده میلیارد ریال',
@@ -65,6 +55,7 @@ export const saleTermsExample = {
 
 export const rentTermsExample = {
   type: 'RENT',
+  shareUnits: 6,
   duration: {
     startDate: '1404/01/01',
     endDate: '1405/01/01',
@@ -92,6 +83,7 @@ export const rentTermsExample = {
 
 export const goodwillTermsExample = {
   type: 'GOODWILL',
+  shareUnits: 6,
   businessRight: {
     description: 'انتقال سرقفلی یک باب مغازه',
     unitCount: 1,
@@ -168,6 +160,7 @@ export const mutualRescissionTermsExample = {
 
 export const constructionJointVentureTermsExample = {
   type: 'CONSTRUCTION_JOINT_VENTURE',
+  shareUnits: 6,
   land: {
     areaSqm: 250.5,
     landValueRials: 50000000000,
@@ -205,7 +198,7 @@ export const signatureDataExample = {
 /** Full POST /properties body example for Swagger */
 export const createPropertyBodyExample = {
   apartment: {
-    summary: 'Apartment with deedInfo + facilities',
+    summary: 'Apartment with typed facilities + deedInfo',
     value: {
       title: 'آپارتمان ۳ خوابه ونک',
       description: 'نورگیر جنوبی، پارکینگ و انباری',
@@ -222,13 +215,21 @@ export const createPropertyBodyExample = {
       address: {
         city: 'تهران',
         province: 'تهران',
-        street: 'ونک',
+        details: 'ونک',
         postalCode: '1968912345',
       },
-      facilities: facilitiesExample,
-      deedInfo: {
-        data: deedInfoExample,
-      },
+      water: true,
+      electricity: true,
+      gas: true,
+      telephone: false,
+      parking: true,
+      parkingCount: 1,
+      storage: true,
+      storageCount: 1,
+      storageArea: 15,
+      elevator: true,
+      otherFacilities: otherFacilitiesExample,
+      deedInfo: deedInfoExample,
     },
   },
 };

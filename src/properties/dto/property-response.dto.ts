@@ -1,10 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PropertyType } from '@prisma/client';
 import { AddressResponseDto } from '../../common/dto/address-response.dto';
-import {
-  deedInfoExample,
-  facilitiesExample,
-} from '../../common/swagger/json-examples';
+import { OtherFacilityDto } from './create-property.dto';
 
 export class DeedInfoResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -13,13 +10,29 @@ export class DeedInfoResponseDto {
   @ApiProperty({ format: 'uuid' })
   propertyId!: string;
 
-  @ApiProperty({
-    type: 'object',
-    additionalProperties: true,
-    description: 'Frontend-owned deed payload',
-    example: deedInfoExample,
-  })
-  data!: Record<string, unknown>;
+  @ApiPropertyOptional({ nullable: true, example: '12345/67' })
+  cadastralNumber!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: '67' })
+  subParcelNumber!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: '12345' })
+  mainParcelNumber!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: '12' })
+  plotNumber!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: '11' })
+  cadastralDistrict!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 'همدان' })
+  registrationArea!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 120.5 })
+  areaSqm!: number | null;
+
+  @ApiPropertyOptional({ nullable: true, example: '6513112345' })
+  postalCode!: string | null;
 
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
@@ -77,13 +90,45 @@ export class PropertyResponseDto {
   @ApiPropertyOptional({ nullable: true })
   furnished!: boolean | null;
 
+  @ApiPropertyOptional({ nullable: true, example: true })
+  water!: boolean | null;
+
+  @ApiPropertyOptional({ nullable: true, example: true })
+  electricity!: boolean | null;
+
+  @ApiPropertyOptional({ nullable: true, example: true })
+  gas!: boolean | null;
+
+  @ApiPropertyOptional({ nullable: true, example: false })
+  telephone!: boolean | null;
+
+  @ApiPropertyOptional({ nullable: true, example: true })
+  parking!: boolean | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 1 })
+  parkingCount!: number | null;
+
+  @ApiPropertyOptional({ nullable: true, example: true })
+  storage!: boolean | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 1 })
+  storageCount!: number | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 15 })
+  storageArea!: number | null;
+
+  @ApiPropertyOptional({ nullable: true, example: true })
+  elevator!: boolean | null;
+
   @ApiPropertyOptional({
-    type: 'object',
-    additionalProperties: true,
+    type: [OtherFacilityDto],
     nullable: true,
-    example: facilitiesExample,
+    example: [
+      { name: 'گرمایش', kind: 'گرمایش از کف' },
+      { name: 'کابینت', kind: 'MDF' },
+    ],
   })
-  facilities!: Record<string, unknown> | null;
+  otherFacilities!: OtherFacilityDto[] | null;
 
   @ApiPropertyOptional({ nullable: true })
   referenceCode!: string | null;
