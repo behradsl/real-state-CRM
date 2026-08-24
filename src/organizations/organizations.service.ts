@@ -38,6 +38,13 @@ const ownerSelect = {
   isActive: true,
   createdAt: true,
   updatedAt: true,
+  organization: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  },
 } satisfies Prisma.UserSelect;
 
 export type PublicOrganization = Prisma.OrganizationGetPayload<{

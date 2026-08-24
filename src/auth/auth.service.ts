@@ -83,6 +83,13 @@ export class AuthService {
             isActive: true,
             createdAt: true,
             updatedAt: true,
+            organization: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
           },
         },
       },

@@ -12,6 +12,17 @@ export class UserResponseDto {
   })
   organizationId!: string | null;
 
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Present for organization users; null for platform ADMIN',
+    example: { id: '…', name: 'آژانس نمونه', slug: 'namoneh' },
+  })
+  organization!: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+
   @ApiProperty({ example: 'agent@agency.com' })
   email!: string;
 

@@ -33,6 +33,13 @@ const userPublicSelect = {
   isActive: true,
   createdAt: true,
   updatedAt: true,
+  organization: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  },
 } satisfies Prisma.UserSelect;
 
 export type PublicUser = Prisma.UserGetPayload<{
@@ -164,6 +171,7 @@ export class UsersService {
       where: {
         organizationId_email: { organizationId, email },
       },
+      select: { ...userPublicSelect, passwordHash: true },
     });
 
     if (!user || !user.isActive) {
@@ -190,6 +198,7 @@ export class UsersService {
         organizationId: null,
         isActive: true,
       },
+      select: { ...userPublicSelect, passwordHash: true },
     });
 
     if (!user) {
