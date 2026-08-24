@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiCookieAuth,
   ApiForbiddenResponse,
@@ -16,6 +24,7 @@ import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { PublicUser } from '../users/users.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { OrganizationResponseDto } from './dto/organization-response.dto';
+import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationsService } from './organizations.service';
 
 @ApiTags('Organizations')
@@ -84,5 +93,30 @@ export class OrganizationsController {
   @ApiResponse({ status: 404, description: 'Organization not found' })
   findOne(@CurrentUser() actor: PublicUser, @Param('id') id: string) {
     return this.organizationsService.findOne(actor, id);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.OWNER)
+  @ApiOperation({
+    summary: 'Update organization',
+    description:
+      'Admin: any organization. Owner: their organization only. Does not change the OWNER user.',
+  })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  @ApiResponse({
+    status: 200,
+    description: 'Organization updated',
+    type: OrganizationResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Not authenticated' })
+  @ApiForbiddenResponse({ description: 'No access to this organization' })
+  @ApiResponse({ status: 404, description: 'Organization not found' })
+  @ApiResponse({ status: 409, description: 'Slug already exists' })
+  update(
+    @CurrentUser() actor: PublicUser,
+    @Param('id') id: string,
+    @Body() updateOrganizationDto: UpdateOrganizationDto,
+  ) {
+    return this.organizationsService.update(actor, id, updateOrganizationDto);
   }
 }

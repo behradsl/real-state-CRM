@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PropertyType } from '@prisma/client';
 import { AddressResponseDto } from '../../common/dto/address-response.dto';
+import { RelatedContractDto } from '../../common/dto/related-contract.dto';
 import { OtherFacilityDto } from './create-property.dto';
 
 export class DeedInfoResponseDto {
@@ -135,6 +136,12 @@ export class PropertyResponseDto {
 
   @ApiPropertyOptional({ type: DeedInfoResponseDto, nullable: true })
   deedInfo!: DeedInfoResponseDto | null;
+
+  @ApiPropertyOptional({
+    type: [RelatedContractDto],
+    description: 'Present on GET /properties/:id',
+  })
+  contracts?: RelatedContractDto[];
 
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   deletedAt!: Date | null;

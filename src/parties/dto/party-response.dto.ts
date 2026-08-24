@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Gender, PartyType } from '@prisma/client';
 import { AddressResponseDto } from '../../common/dto/address-response.dto';
+import { PartyRelatedContractDto } from '../../common/dto/related-contract.dto';
 
 export class PartyResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -56,6 +57,12 @@ export class PartyResponseDto {
 
   @ApiPropertyOptional({ type: AddressResponseDto, nullable: true })
   address!: AddressResponseDto | null;
+
+  @ApiPropertyOptional({
+    type: [PartyRelatedContractDto],
+    description: 'Present on GET /parties/:id',
+  })
+  contracts?: PartyRelatedContractDto[];
 
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   deletedAt!: Date | null;

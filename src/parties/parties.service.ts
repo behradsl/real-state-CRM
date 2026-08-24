@@ -2,12 +2,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { ContractPartyRole, Prisma } from '@prisma/client';
 import {
   assertCanAccessParty,
   partyListWhere,
   resolveScopedOrganizationId,
 } from '../common/utils/access-scope.util';
+import {
+  relatedContractSelect,
+  toRelatedContract,
+  type RelatedContractDto,
+} from '../common/dto/related-contract.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PublicUser } from '../users/users.service';
 import { CreatePartyDto } from './dto/create-party.dto';
@@ -105,10 +110,23 @@ export class PartiesService {
     });
   }
 
-  async findOne(actor: PublicUser, id: string): Promise<PublicParty> {
+  async findOne(
+    actor: PublicUser,
+    id: string,
+  ): Promise<PublicParty & { contracts: Array<RelatedContractDto & { role: ContractPartyRole }> }> {
     const party = await this.prisma.party.findFirst({
       where: { id, deletedAt: null },
-      select: partySelect,
+      select: {
+        ...partySelect,
+        contractLinks: {
+          where: { contract: { deletedAt: null } },
+          select: {
+            role: true,
+            contract: { select: relatedContractSelect },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
 
     if (!party) {
@@ -116,7 +134,15 @@ export class PartiesService {
     }
 
     assertCanAccessParty(actor, party);
-    return party;
+
+    const { contractLinks, ...rest } = party;
+    return {
+      ...rest,
+      contracts: contractLinks.map((link) => ({
+        ...toRelatedContract(link.contract),
+        role: link.role,
+      })),
+    };
   }
 
   async update(

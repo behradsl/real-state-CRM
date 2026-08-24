@@ -12,6 +12,7 @@ import { hashPassword } from '../common/utils/password.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { PublicUser } from '../users/users.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
+import { UpdateOrganizationDto } from './dto/update-organization.dto';
 
 const organizationSelect = {
   id: true,
@@ -124,6 +125,59 @@ export class OrganizationsService {
 
     assertCanAccessOrganization(actor, organization.id);
     return organization;
+  }
+
+  async update(
+    actor: PublicUser,
+    id: string,
+    dto: UpdateOrganizationDto,
+  ): Promise<PublicOrganization> {
+    const existing = await this.prisma.organization.findUnique({
+      where: { id },
+      select: organizationSelect,
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Organization ${id} not found`);
+    }
+
+    assertCanAccessOrganization(actor, existing.id);
+
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        let addressId = existing.addressId;
+
+        if (dto.address) {
+          const address = await tx.address.create({
+            data: {
+              province: dto.address.province,
+              city: dto.address.city,
+              details: dto.address.details,
+              plaque: dto.address.plaque,
+              postalCode: dto.address.postalCode,
+              latitude: dto.address.latitude,
+              longitude: dto.address.longitude,
+            },
+          });
+          addressId = address.id;
+        }
+
+        return tx.organization.update({
+          where: { id },
+          data: {
+            name: dto.name,
+            slug: dto.slug,
+            phone: dto.phone,
+            email: dto.email,
+            website: dto.website,
+            ...(dto.address ? { addressId } : {}),
+          },
+          select: organizationSelect,
+        });
+      });
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
   }
 
   private handlePrismaError(error: unknown): never {

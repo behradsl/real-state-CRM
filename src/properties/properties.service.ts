@@ -15,6 +15,11 @@ import {
 } from '../common/utils/access-scope.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { PublicUser } from '../users/users.service';
+import {
+  relatedContractSelect,
+  toRelatedContract,
+  type RelatedContractDto,
+} from '../common/dto/related-contract.dto';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 
@@ -154,10 +159,20 @@ export class PropertiesService {
     });
   }
 
-  async findOne(actor: PublicUser, id: string): Promise<PublicProperty> {
+  async findOne(
+    actor: PublicUser,
+    id: string,
+  ): Promise<PublicProperty & { contracts: RelatedContractDto[] }> {
     const property = await this.prisma.property.findFirst({
       where: { id, deletedAt: null },
-      select: propertySelect,
+      select: {
+        ...propertySelect,
+        contracts: {
+          where: { deletedAt: null },
+          select: relatedContractSelect,
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
 
     if (!property) {
@@ -165,7 +180,12 @@ export class PropertiesService {
     }
 
     assertCanAccessProperty(actor, property);
-    return property;
+
+    const { contracts, ...rest } = property;
+    return {
+      ...rest,
+      contracts: contracts.map(toRelatedContract),
+    };
   }
 
   async update(
