@@ -43,7 +43,7 @@ export class ContractsController {
   @ApiOperation({
     summary: 'Create contract',
     description:
-      'Creates a contract and ContractParty rows. Property and parties must share the same organization. Use the Examples dropdown for SALE / RENT / GOODWILL / PRE_SALE / MUTUAL_RESCISSION / CONSTRUCTION_JOINT_VENTURE termsAndConditions samples.',
+      'Contract-first create: resolve property/parties via id or nested upsert, then upsert typed *Details and ContractLawyer rows. termsAndConditions still accepted and mapped when typed details are omitted.',
   })
   @ApiBody({
     type: CreateContractDto,
@@ -96,8 +96,9 @@ export class ContractsController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update contract fields',
-    description: 'Does not rebuild party links.',
+    summary: 'Update contract',
+    description:
+      'Same upsert semantics as create: may change property/parties, replace typed details for the contract type, and replace lawyers.',
   })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiResponse({

@@ -1,5 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ContractPartyRole, ContractType } from '@prisma/client';
+import {
+  ContractLawyerSide,
+  ContractPartyRole,
+  ContractType,
+} from '@prisma/client';
 import {
   saleTermsExample,
   signatureDataExample,
@@ -55,6 +59,53 @@ export class ContractSignatureResponseDto {
   createdAt!: Date;
 }
 
+export class ContractLawyerResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  contractId!: string;
+
+  @ApiProperty({ enum: ContractLawyerSide })
+  side!: ContractLawyerSide;
+
+  @ApiPropertyOptional({ nullable: true })
+  name!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  fatherName!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  identityNumber!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  birthPlace!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  birthDate!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  identityExportPlace!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  nationalCode!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  address!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  postalCode!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  cause!: string | null;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  updatedAt!: Date;
+}
+
 export class ContractResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
@@ -76,6 +127,12 @@ export class ContractResponseDto {
 
   @ApiPropertyOptional({ nullable: true, example: 'مبایعه نامه آپارتمان' })
   description!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: '1404/01/10' })
+  contractDate!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: '11:30' })
+  contractTime!: string | null;
 
   @ApiPropertyOptional({
     description: 'Decimal serialized as string',
@@ -133,6 +190,21 @@ export class ContractResponseDto {
   })
   secondPartyCommissionAmount!: string | null;
 
+  @ApiPropertyOptional({ nullable: true })
+  commissionCityRules!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  commissionFactorNumber!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  firstPartyFactorNumber!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  secondPartyFactorNumber!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  notes!: string | null;
+
   @ApiPropertyOptional({
     description: 'Decimal serialized as string — total price / period rent',
     nullable: true,
@@ -170,6 +242,7 @@ export class ContractResponseDto {
     type: 'object',
     additionalProperties: true,
     nullable: true,
+    description: '@deprecated Prefer typed *Details relations',
     example: saleTermsExample,
   })
   termsAndConditions!: Record<string, unknown> | null;
@@ -194,4 +267,49 @@ export class ContractResponseDto {
 
   @ApiPropertyOptional({ type: [ContractSignatureResponseDto] })
   signatures?: ContractSignatureResponseDto[];
+
+  @ApiPropertyOptional({ type: [ContractLawyerResponseDto] })
+  lawyers?: ContractLawyerResponseDto[];
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    nullable: true,
+  })
+  saleDetails?: Record<string, unknown> | null;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    nullable: true,
+  })
+  rentDetails?: Record<string, unknown> | null;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    nullable: true,
+  })
+  goodwillDetails?: Record<string, unknown> | null;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    nullable: true,
+  })
+  preSaleDetails?: Record<string, unknown> | null;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    nullable: true,
+  })
+  rescissionDetails?: Record<string, unknown> | null;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    nullable: true,
+  })
+  cjvDetails?: Record<string, unknown> | null;
 }

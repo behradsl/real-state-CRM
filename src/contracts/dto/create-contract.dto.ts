@@ -11,8 +11,22 @@ import {
   IsString,
   IsUUID,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { saleTermsExample } from '../../common/swagger/json-examples';
+import {
+  ContractPartyInputDto,
+  ContractPropertyInputDto,
+} from './contract-nested.dto';
+import {
+  ConstructionJvDetailsDto,
+  ContractLawyersDto,
+  GoodwillDetailsDto,
+  MutualRescissionDetailsDto,
+  PreSaleDetailsDto,
+  RentDetailsDto,
+  SaleDetailsDto,
+} from './typed-details.dto';
 
 export class CreateContractDto {
   @ApiPropertyOptional({
@@ -31,17 +45,63 @@ export class CreateContractDto {
   @IsString()
   contractNumber!: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    example: '11111111-1111-4111-8111-111111111111',
+    description: 'Link existing property. Required unless `property` is provided.',
   })
+  @IsOptional()
   @IsUUID()
-  propertyId!: string;
+  propertyId?: string;
+
+  @ApiPropertyOptional({
+    type: ContractPropertyInputDto,
+    description:
+      'Create or patch property then link. Prefer over propertyId when both set with nested id.',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ContractPropertyInputDto)
+  property?: ContractPropertyInputDto;
 
   @ApiPropertyOptional({ example: 'مبایعه نامه آپارتمان' })
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ example: '1404/01/10' })
+  @IsOptional()
+  @IsString()
+  contractDate?: string;
+
+  @ApiPropertyOptional({ example: '11:30' })
+  @IsOptional()
+  @IsString()
+  contractTime?: string;
+
+  @ApiPropertyOptional({ example: 'تعرفه اتحادیه همدان' })
+  @IsOptional()
+  @IsString()
+  commissionCityRules?: string;
+
+  @ApiPropertyOptional({ example: 'F-1001' })
+  @IsOptional()
+  @IsString()
+  commissionFactorNumber?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  firstPartyFactorNumber?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  secondPartyFactorNumber?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  notes?: string;
 
   @ApiPropertyOptional({ example: 1.5 })
   @IsOptional()
@@ -169,38 +229,97 @@ export class CreateContractDto {
     type: 'object',
     additionalProperties: true,
     description:
-      'Frontend-owned terms by contract type (SALE, RENT, GOODWILL, PRE_SALE, MUTUAL_RESCISSION, CONSTRUCTION_JOINT_VENTURE). Use the request examples dropdown for full samples. Shape is not validated by the API.',
+      '@deprecated Prefer typed *Details. Still accepted; mapped into details when typed details are missing.',
     example: saleTermsExample,
   })
   @IsOptional()
   @IsObject()
   termsAndConditions?: Record<string, unknown>;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    example: '22222222-2222-4222-8222-222222222222',
+    description: 'Required unless `firstParty` nested object is provided.',
   })
+  @IsOptional()
   @IsUUID()
-  firstPartyId!: string;
+  firstPartyId?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    example: '33333333-3333-4333-8333-333333333333',
+    description: 'Required unless `secondParty` nested object is provided.',
   })
+  @IsOptional()
   @IsUUID()
-  secondPartyId!: string;
+  secondPartyId?: string;
 
   @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
     description: 'Optional witness party ids',
-    example: [
-      '44444444-4444-4444-8444-444444444444',
-      '55555555-5555-4555-8555-555555555555',
-    ],
   })
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
   witnessIds?: string[];
+
+  @ApiPropertyOptional({ type: ContractPartyInputDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ContractPartyInputDto)
+  firstParty?: ContractPartyInputDto;
+
+  @ApiPropertyOptional({ type: ContractPartyInputDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ContractPartyInputDto)
+  secondParty?: ContractPartyInputDto;
+
+  @ApiPropertyOptional({ type: [ContractPartyInputDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ContractPartyInputDto)
+  witnesses?: ContractPartyInputDto[];
+
+  @ApiPropertyOptional({ type: ContractLawyersDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ContractLawyersDto)
+  lawyers?: ContractLawyersDto;
+
+  @ApiPropertyOptional({ type: SaleDetailsDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SaleDetailsDto)
+  saleDetails?: SaleDetailsDto;
+
+  @ApiPropertyOptional({ type: RentDetailsDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RentDetailsDto)
+  rentDetails?: RentDetailsDto;
+
+  @ApiPropertyOptional({ type: GoodwillDetailsDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => GoodwillDetailsDto)
+  goodwillDetails?: GoodwillDetailsDto;
+
+  @ApiPropertyOptional({ type: PreSaleDetailsDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PreSaleDetailsDto)
+  preSaleDetails?: PreSaleDetailsDto;
+
+  @ApiPropertyOptional({ type: MutualRescissionDetailsDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => MutualRescissionDetailsDto)
+  rescissionDetails?: MutualRescissionDetailsDto;
+
+  @ApiPropertyOptional({ type: ConstructionJvDetailsDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ConstructionJvDetailsDto)
+  cjvDetails?: ConstructionJvDetailsDto;
 }
