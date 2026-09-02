@@ -21,6 +21,9 @@ export class OrganizationResponseDto {
   @ApiPropertyOptional({ nullable: true })
   website!: string | null;
 
+  @ApiPropertyOptional({ nullable: true, example: '۱۲۳۴۵' })
+  licenseNumber!: string | null;
+
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   addressId!: string | null;
 

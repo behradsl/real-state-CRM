@@ -139,6 +139,7 @@ export class PropertiesService {
                     registrationArea: dto.deedInfo.registrationArea,
                     areaSqm: dto.deedInfo.areaSqm,
                     postalCode: dto.deedInfo.postalCode,
+                    deedSerialNumber: dto.deedInfo.deedSerialNumber,
                   },
                 }
               : undefined,
@@ -245,6 +246,7 @@ export class PropertiesService {
               registrationArea: dto.deedInfo.registrationArea,
               areaSqm: dto.deedInfo.areaSqm,
               postalCode: dto.deedInfo.postalCode,
+              deedSerialNumber: dto.deedInfo.deedSerialNumber,
             },
             update: {
               cadastralNumber: dto.deedInfo.cadastralNumber,
@@ -255,6 +257,7 @@ export class PropertiesService {
               registrationArea: dto.deedInfo.registrationArea,
               areaSqm: dto.deedInfo.areaSqm,
               postalCode: dto.deedInfo.postalCode,
+              deedSerialNumber: dto.deedInfo.deedSerialNumber,
             },
           });
         }

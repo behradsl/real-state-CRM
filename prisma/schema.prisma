@@ -87,21 +87,24 @@ model Address {
 // ─────────────────────────────────────────────
 
 model Organization {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  phone     String?
-  email     String?
-  website   String?
-  addressId String?
-  address   Address? @relation(fields: [addressId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  name          String
+  slug          String   @unique
+  phone         String?
+  email         String?
+  website       String?
+  /// Organization / union license number shown on contract stamps
+  licenseNumber String?
+  addressId     String?
+  address       Address? @relation(fields: [addressId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  users      User[]
-  properties Property[]
-  parties    Party[]
-  contracts  Contract[]
+  users         User[]
+  properties    Property[]
+  parties       Party[]
+  contracts     Contract[]
+  printLayouts  ContractPrintLayout[]
 
   @@index([addressId])
 }
@@ -208,6 +211,8 @@ model DeedInfo {
   registrationArea  String?
   areaSqm           Float?
   postalCode        String?
+  /// Deed booklet / serial number (e.g. for rent forms)
+  deedSerialNumber  String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -315,6 +320,28 @@ model ContractParty {
   @@unique([contractId, partyId, role])
   @@index([contractId])
   @@index([partyId])
+}
+
+// ─────────────────────────────────────────────
+// Per-organization contract print field layouts
+// ─────────────────────────────────────────────
+
+model ContractPrintLayout {
+  id             String       @id @default(uuid())
+  organizationId String
+  contractType   ContractType
+  /// A3 portrait default: 297 × 420 mm
+  paperWidthMm   Float        @default(297)
+  paperHeightMm  Float        @default(420)
+  /// { [fieldKey]: { start: { x, y, page? }, end: { x, y, page? } } } — mm, bottom-left origin
+  fields         Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, contractType])
+  @@index([organizationId])
 }
 
 model File {

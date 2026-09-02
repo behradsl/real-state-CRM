@@ -66,6 +66,11 @@ export class CreateDeedInfoDto {
   @IsOptional()
   @IsString()
   postalCode?: string;
+
+  @ApiPropertyOptional({ example: 'SN-998877' })
+  @IsOptional()
+  @IsString()
+  deedSerialNumber?: string;
 }
 
 export class CreatePropertyDto {

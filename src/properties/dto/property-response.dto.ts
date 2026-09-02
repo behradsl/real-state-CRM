@@ -35,6 +35,9 @@ export class DeedInfoResponseDto {
   @ApiPropertyOptional({ nullable: true, example: '6513112345' })
   postalCode!: string | null;
 
+  @ApiPropertyOptional({ nullable: true, example: 'SN-998877' })
+  deedSerialNumber!: string | null;
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
 

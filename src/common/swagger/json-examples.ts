@@ -1,6 +1,6 @@
 /**
  * Frontend-owned JSON payload examples for Swagger.
- * Derived from Iranian real-estate contract forms under /contracts/*.jpg
+ * Aligned with typed terms shapes stored in contract.termsAndConditions.
  */
 
 export const deedInfoExample = {
@@ -12,6 +12,7 @@ export const deedInfoExample = {
   registrationArea: 'همدان',
   areaSqm: 120.5,
   postalCode: '6513112345',
+  deedSerialNumber: 'SN-998877',
 };
 
 export const otherFacilitiesExample = [
@@ -19,172 +20,212 @@ export const otherFacilitiesExample = [
   { name: 'کابینت', kind: 'MDF' },
 ];
 
+const lawyersExample = {
+  firstParty: {
+    name: 'رضا وکیل',
+    fatherName: 'علی',
+    identityNumber: '123456',
+    nationalCode: '0012345678',
+    cause: 'وکالت‌نامه رسمی',
+  },
+};
+
+const commissionExample = {
+  cityRules: 'تعرفه اتحادیه همدان',
+  amount: 225000000,
+  firstPartyAmount: 112500000,
+  secondPartyAmount: 112500000,
+  taxPercent: 9,
+  amountWithTax: 20250000,
+  factorNumber: 'F-1001',
+};
+
 export const saleTermsExample = {
   type: 'SALE',
   shareUnits: 6,
-  price: {
-    totalRials: 15000000000,
+  property: {
+    shareUnits: 6,
+    pricePerSqm: 125000000,
+  },
+  sale: {
+    totalAmount: 15000000000,
     totalInWords: 'پانزده میلیارد ریال',
-    currency: 'IRR',
-    payments: [
-      {
-        label: 'بیعانه',
-        amountRials: 2000000000,
-        dueAt: '1404/01/15',
-        method: 'CASH',
-      },
-      {
-        label: 'باقیمانده در دفترخانه',
-        amountRials: 13000000000,
-        dueAt: '1404/02/20',
-        method: 'BANK',
-      },
-    ],
+    prePaymentAmount: 2000000000,
+    prePaymentChequeNumber: '123456',
+    prePaymentBankName: 'ملی',
+    prePaymentBankBranch: 'مرکزی',
+    remainderAmount: 13000000000,
+    voucherRegistrationDate: '1404/02/20',
+    voucherOrganizationNumber: '۱۲',
+    deliveryDate: '1404/02/25',
+    cancelationPenalty: '۱۰٪ ثمن',
+    breachPenalty: 'وجه التزام روزانه',
+    notaryFeePayer: 'مشترک',
+    delayPenaltyFirstPartyPerDay: 5000000,
+    delayPenaltySecondPartyPerDay: 5000000,
   },
-  transfer: {
-    notaryOffice: 'دفترخانه شماره ۱۲ همدان',
-    officialDeedDueAt: '1404/02/20',
-    deliveryDueAt: '1404/02/25',
+  lawyers: lawyersExample,
+  commission: commissionExample,
+  contract: {
+    date: '1404/01/10',
+    time: '11:30',
+    description: 'مبایعه‌نامه آپارتمان',
   },
-  penalties: {
-    delayPenaltyPerDayRials: 5000000,
-    arbitrationCenter: 'مرکز داوری اتحادیه مشاورین املاک',
-  },
-  clauses: ['ماده۴ تا ماده۱۱ طبق فرم اتحادیه'],
+  notes: 'طبق فرم اتحادیه',
 };
 
 export const rentTermsExample = {
   type: 'RENT',
   shareUnits: 6,
-  duration: {
-    startDate: '1404/01/01',
-    endDate: '1405/01/01',
-    unit: 'YEAR',
-    value: 1,
-  },
+  property: { shareUnits: 6 },
   rent: {
-    totalRials: 1200000000,
-    monthlyRials: 100000000,
-    securityDepositRials: 500000000,
-    paymentDayOfMonth: 5,
-    paymentMethod: {
-      type: 'BANK',
-      bankName: 'ملی',
-      accountNumber: '0100000000000',
-      branch: 'مرکزی',
-    },
+    durationMonths: 12,
+    fromDate: '1404/01/01',
+    toDate: '1405/01/01',
+    monthlyAmount: 100000000,
+    monthlyInWords: 'یکصد میلیون ریال',
+    mortgageAmount: 500000000,
+    mortgageInWords: 'پانصد میلیون ریال',
+    totalInWords: 'یک میلیارد و دویست میلیون ریال',
+    prePaymentAmount: 100000000,
+    prePaymentChequeNumber: '654321',
+    prePaymentBankName: 'ملت',
+    prePaymentBankBranch: 'ولیعصر',
+    remainderAmount: 400000000,
+    remainderDueDate: '1404/01/15',
+    deliveryDate: '1404/01/01',
+    cancelationPenalty: 'یک ماه اجاره',
+    breachPenalty: 'وجه التزام',
+    notaryFeePayer: 'مستأجر',
+    delayPenaltyFirstPartyPerDay: 2000000,
+    delayPenaltySecondPartyPerDay: 2000000,
   },
-  handoverDate: '1404/01/01',
-  penalties: {
-    delayPenaltyPerDayRials: 2000000,
-  },
-  clauses: ['مواد ۶ تا ۱۱ فرم اجاره'],
+  lawyers: lawyersExample,
+  commission: commissionExample,
+  notes: 'مواد ۶ تا ۱۱ فرم اجاره',
 };
 
 export const goodwillTermsExample = {
   type: 'GOODWILL',
   shareUnits: 6,
-  businessRight: {
-    description: 'انتقال سرقفلی یک باب مغازه',
-    unitCount: 1,
+  property: {
+    shareUnits: 6,
+    pricePerSqm: 80000000,
   },
-  price: {
-    totalRials: 8000000000,
-    totalTomans: 800000000,
-    paidUpfrontRials: 3000000000,
-    remainingAtOfficialDeedRials: 5000000000,
+  goodwill: {
+    totalAmount: 8000000000,
+    prePaymentAmount: 3000000000,
+    prePaymentChequeNumber: '778899',
+    prePaymentBankName: 'صادرات',
+    prePaymentBankBranch: 'مرکزی',
+    remainderAmount: 5000000000,
+    remainderDueDate: '1404/03/10',
+    penaltyAmount: '۱۰٪',
+    deliveryDate: '1404/03/12',
   },
-  transfer: {
-    notaryOffice: 'دفترخانه شماره ۵',
-    officialDeedDueAt: '1404/03/10',
-    deliveryDueAt: '1404/03/12',
-  },
-  taxes: {
-    municipal: true,
-    business: true,
-    transfer: true,
-    payer: 'TRANSFEREE',
-  },
+  lawyers: lawyersExample,
+  commission: commissionExample,
 };
 
 export const preSaleTermsExample = {
   type: 'PRE_SALE',
-  buildingPermitNumber: '99-100-20',
-  buildingSpecs: {
+  presale: {
+    renovationCode: 'RNV-99',
+    technicalIdNumber: 'TECH-100',
+    insuranceNumber: 'INS-55',
+    buildingPermitNumber: '99-100-20',
+    buildingPermitDate: '1402/05/01',
+    equipped: 'بله',
     totalFloors: 5,
-    unitsPerFloor: 2,
-    unitAreaSqm: 120.5,
-    targetFloor: 3,
-    orientation: 'SOUTH',
-    parkingNumber: 'P-03',
-    storageNumber: 'S-03',
-    flooring: 'CERAMIC',
-    kitchenCabinets: 'MDF_HIGH_GLOSS',
-    heatingSystem: 'PACKAGE_RADIATOR',
-    coolingSystem: 'SPLIT',
-    windowType: 'UPVC_DOUBLE_GLAZED',
-    facadeType: 'TRAVERTINE',
-    skeleton: 'CONCRETE',
-    elevator: true,
-    security: ['CCTV', 'ANTI_THEFT_DOOR'],
+    totalUnits: 10,
+    areaSqm: 120.5,
+    storage: 'دارد',
+    orientation: 'جنوبی',
+    parkingNumberAndArea: 'P-03 / ۱۲ متر',
+    flooringType: 'سرامیک',
+    cabinetAndFaucetType: 'MDF براق',
+    bathroomType: 'فرنگی',
+    switchOutletType: 'لگراند',
+    entranceDoorType: 'ضد سرقت',
+    interiorDoorType: 'HDF',
+    ceilingPlasterType: 'گچ',
+    emergencyWaterSourceType: 'منبع',
+    heatingType: 'پکیج',
+    coolerType: 'اسپیلیت',
+    intercomType: 'تصویری',
+    cctv: 'دارد',
+    tilingType: 'پرسلان',
+    windowType: 'UPVC دوجداره',
+    facadeType: 'تراورتن',
+    parkingFloorWallCover: 'رنگ',
+    lighting: 'LED',
+    balconyCorridorRailing: 'شیشه‌ای',
+    fireExtinguisher: 'دارد',
+    elevator: 'دارد',
+    waterMotor: 'دارد',
+    utilitiesScore: 'کامل',
+    loan: 'دارد',
+    loanType: 'مسکن',
+    loanInstallmentAmount: 50000000,
+    totalAmount: 50000000000,
+    totalInWords: 'پنجاه میلیارد ریال',
+    deliveryDate: '1405/01/01',
+    deedTransferDate: '1405/02/01',
+    selfDeclareFormNumber: 'SDF-12',
+    voucherOrganizationNumber: '۱۲',
   },
-  financials: {
-    totalPriceRials: 50000000000,
-    paymentSchedule: [
-      { percent: 30, label: 'پیش‌پرداخت', dueAt: '1404/01/01' },
-      { percent: 60, label: 'اقساط ساخت', dueAt: '1404/06/01' },
-      { percent: 10, label: 'زمان انتقال سند', dueAt: '1405/01/01' },
-    ],
-  },
+  lawyers: lawyersExample,
+  commission: commissionExample,
 };
 
 export const mutualRescissionTermsExample = {
   type: 'MUTUAL_RESCISSION',
-  originalContract: {
-    contractNumber: 'CNT-2025-088',
-    contractType: 'SALE',
-    signedAt: '1403/08/12',
-  },
   rescission: {
-    reason: 'توافق طرفین برای فسخ',
-    effectiveDate: '1404/02/01',
-    propertyReturnedAsIs: true,
-    waiveFutureClaims: true,
+    originalContractNumber: 'CNT-2025-088',
+    originalContractDate: '1403/08/12',
+    originalAgencyName: 'آژانس نمونه',
+    aggregationClause: 'تجمیع تعهدات طبق قرارداد اصلی',
+    deliveryClause: 'تحویل ملک در وضعیت فعلی',
+    price: 2000000000,
+    paymentType: 'نقد',
   },
-  settlement: {
-    refundAmountRials: 2000000000,
-    refundDueAt: '1404/02/05',
-    notes: 'بازگشت بیعانه پس از تحویل ملک',
+  property: {
+    shareUnits: 6,
+    areaSqm: 120.5,
+    county: 'همدان',
+    ownershipNumber: 'OWN-44',
   },
+  lawyers: lawyersExample,
+  commission: commissionExample,
 };
 
 export const constructionJointVentureTermsExample = {
   type: 'CONSTRUCTION_JOINT_VENTURE',
   shareUnits: 6,
-  land: {
+  property: {
+    shareUnits: 6,
     areaSqm: 250.5,
-    landValueRials: 50000000000,
   },
-  shares: {
-    firstPartyPercent: 55,
-    secondPartyPercent: 45,
-    firstPartyDangs: 3.3,
-    secondPartyDangs: 2.7,
+  cjv: {
+    propertyDescription: 'قطعه زمین مسکونی',
+    totalAmount: 50000000000,
+    totalInWords: 'پنجاه میلیارد ریال',
+    governmentalCosts: 2000000000,
+    constructionCosts: 30000000000,
+    facilityRightsCosts: 1000000000,
+    destructionCost: 500000000,
+    firstPartyShare: '۵۵٪',
+    secondPartyShare: '۴۵٪',
+    startDateInWords: 'اول فروردین ۱۴۰۴',
+    endDateInWords: 'اول فروردین ۱۴۰۶',
+    costDetailsPrepareDate: '1404/01/15',
+    voucherTransferDate: '1404/02/01',
+    shareUnitsToTransfer: '۳',
+    delayPenaltyFirstPartyPerDay: 10000000,
+    delayPenaltySecondPartyPerDay: 10000000,
   },
-  timeline: {
-    startDate: '1404/01/01',
-    endDate: '1406/01/01',
-    milestones: [
-      { name: 'اسکلت', dueAt: '1404/08/01' },
-      { name: 'نازک‌کاری', dueAt: '1405/06/01' },
-      { name: 'تحویل', dueAt: '1406/01/01' },
-    ],
-  },
-  constructionObligations: {
-    builderParty: 'SECOND_PARTY',
-    landOwnerParty: 'FIRST_PARTY',
-    permitsResponsibility: 'SECOND_PARTY',
-  },
+  lawyers: lawyersExample,
+  commission: commissionExample,
 };
 
 export const signatureDataExample = {
@@ -251,6 +292,7 @@ export const createContractBodyExamples = {
       firstPartyCommissionAmount: 112500000,
       secondPartyCommissionPercentage: 0.75,
       secondPartyCommissionAmount: 112500000,
+      totalAmount: 15000000000,
       firstPartyId: '22222222-2222-4222-8222-222222222222',
       secondPartyId: '33333333-3333-4333-8333-333333333333',
       witnessIds: [
@@ -269,6 +311,9 @@ export const createContractBodyExamples = {
       firstPartyId: '22222222-2222-4222-8222-222222222222',
       secondPartyId: '33333333-3333-4333-8333-333333333333',
       commissionAmount: 50000000,
+      totalAmount: 1200000000,
+      monthlyAmount: 100000000,
+      depositAmount: 500000000,
       termsAndConditions: rentTermsExample,
     },
   },
@@ -280,6 +325,7 @@ export const createContractBodyExamples = {
       propertyId: '11111111-1111-4111-8111-111111111111',
       firstPartyId: '22222222-2222-4222-8222-222222222222',
       secondPartyId: '33333333-3333-4333-8333-333333333333',
+      totalAmount: 8000000000,
       termsAndConditions: goodwillTermsExample,
     },
   },
@@ -291,6 +337,7 @@ export const createContractBodyExamples = {
       propertyId: '11111111-1111-4111-8111-111111111111',
       firstPartyId: '22222222-2222-4222-8222-222222222222',
       secondPartyId: '33333333-3333-4333-8333-333333333333',
+      totalAmount: 50000000000,
       termsAndConditions: preSaleTermsExample,
     },
   },
@@ -313,6 +360,7 @@ export const createContractBodyExamples = {
       propertyId: '11111111-1111-4111-8111-111111111111',
       firstPartyId: '22222222-2222-4222-8222-222222222222',
       secondPartyId: '33333333-3333-4333-8333-333333333333',
+      totalAmount: 50000000000,
       termsAndConditions: constructionJointVentureTermsExample,
     },
   },

@@ -15,6 +15,7 @@ import { FilesModule } from './files/files.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { PartiesModule } from './parties/parties.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { PrintLayoutsModule } from './print-layouts/print-layouts.module';
 import { PropertiesModule } from './properties/properties.module';
 import { UsersModule } from './users/users.module';
 
@@ -38,6 +39,7 @@ import { UsersModule } from './users/users.module';
     PartiesModule,
     ContractsModule,
     FilesModule,
+    PrintLayoutsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -34,6 +34,11 @@ export class UpdateOrganizationDto {
   @IsString()
   website?: string;
 
+  @ApiPropertyOptional({ example: '۱۲۳۴۵' })
+  @IsOptional()
+  @IsString()
+  licenseNumber?: string;
+
   @ApiPropertyOptional({ type: CreateAddressDto })
   @IsOptional()
   @ValidateNested()
