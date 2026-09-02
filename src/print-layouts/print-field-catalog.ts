@@ -1,20 +1,5 @@
 import { ContractType } from '@prisma/client';
 
-/** Shared party / lawyer / org stamp keys used across many contract types. */
-const partyKeys = (prefix: 'firstParty' | 'secondParty') =>
-  [
-    `${prefix}.name`,
-    `${prefix}.fatherName`,
-    `${prefix}.identityNumber`,
-    `${prefix}.identityExportPlace`,
-    `${prefix}.nationalCode`,
-    `${prefix}.birthPlace`,
-    `${prefix}.birthDate`,
-    `${prefix}.address`,
-    `${prefix}.postalCode`,
-    `${prefix}.phone`,
-  ] as const;
-
 const lawyerKeys = (prefix: 'firstParty' | 'secondParty') =>
   [
     `${prefix}.lawyer.name`,
@@ -48,26 +33,151 @@ const orgStampKeys = [
   'commission.secondPartyFactorNumber',
 ] as const;
 
-export const PRINT_FIELD_CATALOG: Record<ContractType, readonly string[]> = {
+/**
+ * Party print keys aligned with frontend partyFieldsForContract +
+ * partyPrintKeysFromFields (per contract type).
+ */
+const partyKeysByType: Record<
+  ContractType,
+  (prefix: 'firstParty' | 'secondParty') => readonly string[]
+> = {
+  SALE: (prefix) =>
+    [
+      `${prefix}.name`,
+      `${prefix}.fatherName`,
+      `${prefix}.identityNumber`,
+      `${prefix}.identityExportPlace`,
+      `${prefix}.nationalCode`,
+      `${prefix}.birthPlace`,
+      `${prefix}.address`,
+      `${prefix}.postalCode`,
+      `${prefix}.phone`,
+    ] as const,
+  RENT: (prefix) =>
+    [
+      `${prefix}.name`,
+      `${prefix}.fatherName`,
+      `${prefix}.identityNumber`,
+      `${prefix}.nationalCode`,
+      `${prefix}.birthPlace`,
+      `${prefix}.address`,
+      `${prefix}.postalCode`,
+      `${prefix}.phone`,
+    ] as const,
+  GOODWILL: (prefix) =>
+    [
+      `${prefix}.name`,
+      `${prefix}.fatherName`,
+      `${prefix}.identityNumber`,
+      `${prefix}.nationalCode`,
+      `${prefix}.address`,
+      `${prefix}.phone`,
+    ] as const,
+  PRE_SALE: (prefix) =>
+    [
+      `${prefix}.name`,
+      `${prefix}.fatherName`,
+      `${prefix}.identityNumber`,
+      `${prefix}.nationalCode`,
+      `${prefix}.birthPlace`,
+      `${prefix}.birthDate`,
+      `${prefix}.address`,
+      `${prefix}.postalCode`,
+      `${prefix}.phone`,
+    ] as const,
+  MUTUAL_RESCISSION: (prefix) =>
+    [
+      `${prefix}.name`,
+      `${prefix}.fatherName`,
+      `${prefix}.identityNumber`,
+      `${prefix}.nationalCode`,
+      `${prefix}.address`,
+      `${prefix}.phone`,
+    ] as const,
+  CONSTRUCTION_JOINT_VENTURE: (prefix) =>
+    [
+      `${prefix}.name`,
+      `${prefix}.fatherName`,
+      `${prefix}.identityNumber`,
+      `${prefix}.nationalCode`,
+      `${prefix}.address`,
+      `${prefix}.postalCode`,
+      `${prefix}.phone`,
+    ] as const,
+};
+
+/**
+ * Property print keys from propertyFieldsForContract +
+ * propertyPrintKeysFromFields, plus terms-only keys not on PropertyForm.
+ */
+const propertyKeysByType: Record<ContractType, readonly string[]> = {
   SALE: [
-    ...partyKeys('firstParty'),
-    ...lawyerKeys('firstParty'),
-    ...partyKeys('secondParty'),
-    ...lawyerKeys('secondParty'),
-    'property.shareUnits',
     'property.type',
-    'property.cadastralNumber',
-    'property.subParcelNumber',
-    'property.mainParcelNumber',
-    'property.yearBuilt',
-    'property.cadastralDistrict',
-    'property.registrationArea',
     'property.areaSqm',
-    'property.pricePerSqm',
+    'property.yearBuilt',
     'property.parking',
     'property.storage',
     'property.address',
     'property.postalCode',
+    'property.cadastralNumber',
+    'property.subParcelNumber',
+    'property.mainParcelNumber',
+    'property.cadastralDistrict',
+    'property.registrationArea',
+    'property.shareUnits',
+    'property.pricePerSqm',
+  ],
+  RENT: [
+    'property.type',
+    'property.bedrooms',
+    'property.parking',
+    'property.storage',
+    'property.postalCode',
+    'property.cadastralNumber',
+    'property.subParcelNumber',
+    'property.mainParcelNumber',
+    'property.deedSerialNumber',
+    'property.shareUnits',
+    'property.ownerName',
+  ],
+  GOODWILL: [
+    'property.type',
+    'property.storage',
+    'property.cadastralNumber',
+    'property.subParcelNumber',
+    'property.mainParcelNumber',
+    'property.cadastralDistrict',
+    'property.registrationArea',
+    'property.shareUnits',
+    'property.pricePerSqm',
+  ],
+  PRE_SALE: [
+    'property.type',
+    'property.cadastralNumber',
+    'property.address',
+  ],
+  MUTUAL_RESCISSION: [
+    'property.type',
+    'property.areaSqm',
+    'property.cadastralNumber',
+    'property.subParcelNumber',
+    'property.mainParcelNumber',
+    'property.cadastralDistrict',
+    'property.shareUnits',
+    'property.county',
+    'property.ownershipNumber',
+  ],
+  CONSTRUCTION_JOINT_VENTURE: [
+    'property.type',
+    'property.areaSqm',
+    'property.address',
+    'property.postalCode',
+    'property.shareUnits',
+  ],
+};
+
+const typeTermsKeys: Record<ContractType, readonly string[]> = {
+  SALE: [
     'sale.totalAmount',
     'sale.totalInWords',
     'sale.prePaymentAmount',
@@ -83,24 +193,8 @@ export const PRINT_FIELD_CATALOG: Record<ContractType, readonly string[]> = {
     'sale.notaryFeePayer',
     'sale.delayPenaltyFirstPartyPerDay',
     'sale.delayPenaltySecondPartyPerDay',
-    ...orgStampKeys,
   ],
   RENT: [
-    ...partyKeys('firstParty'),
-    ...lawyerKeys('firstParty'),
-    ...partyKeys('secondParty'),
-    ...lawyerKeys('secondParty'),
-    'property.shareUnits',
-    'property.type',
-    'property.cadastralNumber',
-    'property.subParcelNumber',
-    'property.mainParcelNumber',
-    'property.deedSerialNumber',
-    'property.ownerName',
-    'property.bedrooms',
-    'property.parking',
-    'property.storage',
-    'property.postalCode',
     'rent.durationMonths',
     'rent.fromDate',
     'rent.toDate',
@@ -121,22 +215,8 @@ export const PRINT_FIELD_CATALOG: Record<ContractType, readonly string[]> = {
     'rent.notaryFeePayer',
     'rent.delayPenaltyFirstPartyPerDay',
     'rent.delayPenaltySecondPartyPerDay',
-    ...orgStampKeys,
   ],
   GOODWILL: [
-    ...partyKeys('firstParty'),
-    ...lawyerKeys('firstParty'),
-    ...partyKeys('secondParty'),
-    ...lawyerKeys('secondParty'),
-    'property.shareUnits',
-    'property.type',
-    'property.cadastralNumber',
-    'property.subParcelNumber',
-    'property.mainParcelNumber',
-    'property.cadastralDistrict',
-    'property.registrationArea',
-    'property.pricePerSqm',
-    'property.storage',
     'goodwill.totalAmount',
     'goodwill.prePaymentAmount',
     'goodwill.prePaymentChequeNumber',
@@ -146,15 +226,8 @@ export const PRINT_FIELD_CATALOG: Record<ContractType, readonly string[]> = {
     'goodwill.remainderDueDate',
     'goodwill.penaltyAmount',
     'goodwill.deliveryDate',
-    ...orgStampKeys,
   ],
   PRE_SALE: [
-    ...partyKeys('firstParty'),
-    ...lawyerKeys('firstParty'),
-    ...partyKeys('secondParty'),
-    ...lawyerKeys('secondParty'),
-    'property.type',
-    'property.cadastralNumber',
     'presale.renovationCode',
     'presale.technicalIdNumber',
     'presale.insuranceNumber',
@@ -198,39 +271,18 @@ export const PRINT_FIELD_CATALOG: Record<ContractType, readonly string[]> = {
     'presale.deedTransferDate',
     'presale.selfDeclareFormNumber',
     'presale.voucherOrganizationNumber',
-    ...orgStampKeys,
   ],
   MUTUAL_RESCISSION: [
-    ...partyKeys('firstParty'),
-    ...lawyerKeys('firstParty'),
-    ...partyKeys('secondParty'),
-    ...lawyerKeys('secondParty'),
     'rescission.originalContractNumber',
     'rescission.originalContractDate',
     'rescission.originalAgencyName',
-    'property.shareUnits',
-    'property.areaSqm',
-    'property.cadastralNumber',
-    'property.subParcelNumber',
-    'property.mainParcelNumber',
-    'property.cadastralDistrict',
-    'property.county',
-    'property.ownershipNumber',
     'rescission.aggregationClause',
     'rescission.deliveryClause',
     'rescission.price',
     'rescission.paymentType',
-    ...orgStampKeys,
   ],
   CONSTRUCTION_JOINT_VENTURE: [
-    ...partyKeys('firstParty'),
-    ...lawyerKeys('firstParty'),
-    ...partyKeys('secondParty'),
-    ...lawyerKeys('secondParty'),
     'cjv.propertyDescription',
-    'property.address',
-    'property.shareUnits',
-    'property.areaSqm',
     'cjv.totalAmount',
     'cjv.totalInWords',
     'cjv.governmentalCosts',
@@ -246,8 +298,31 @@ export const PRINT_FIELD_CATALOG: Record<ContractType, readonly string[]> = {
     'cjv.shareUnitsToTransfer',
     'cjv.delayPenaltyFirstPartyPerDay',
     'cjv.delayPenaltySecondPartyPerDay',
-    ...orgStampKeys,
   ],
+};
+
+function catalogForType(type: ContractType): readonly string[] {
+  const partyKeys = partyKeysByType[type];
+  return [
+    ...partyKeys('firstParty'),
+    ...lawyerKeys('firstParty'),
+    ...partyKeys('secondParty'),
+    ...lawyerKeys('secondParty'),
+    ...propertyKeysByType[type],
+    ...typeTermsKeys[type],
+    ...orgStampKeys,
+  ];
+}
+
+export const PRINT_FIELD_CATALOG: Record<ContractType, readonly string[]> = {
+  SALE: catalogForType(ContractType.SALE),
+  RENT: catalogForType(ContractType.RENT),
+  GOODWILL: catalogForType(ContractType.GOODWILL),
+  PRE_SALE: catalogForType(ContractType.PRE_SALE),
+  MUTUAL_RESCISSION: catalogForType(ContractType.MUTUAL_RESCISSION),
+  CONSTRUCTION_JOINT_VENTURE: catalogForType(
+    ContractType.CONSTRUCTION_JOINT_VENTURE,
+  ),
 };
 
 export function isAllowedPrintField(
