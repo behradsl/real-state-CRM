@@ -53,6 +53,11 @@ enum ContractPartyRole {
   WITNESS
 }
 
+enum ContractLawyerSide {
+  FIRST_PARTY
+  SECOND_PARTY
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -269,6 +274,10 @@ model Contract {
   contractNumber String
   description    String?
 
+  /// Jalali display string OK
+  contractDate String?
+  contractTime String?
+
   commissionPercentage            Decimal? @db.Decimal(14, 2)
   commissionAmount                Decimal? @db.Decimal(14, 2)
   taxPercentage                   Decimal? @db.Decimal(14, 2)
@@ -277,6 +286,12 @@ model Contract {
   firstPartyCommissionAmount      Decimal? @db.Decimal(14, 2)
   secondPartyCommissionPercentage Decimal? @db.Decimal(14, 2)
   secondPartyCommissionAmount     Decimal? @db.Decimal(14, 2)
+
+  commissionCityRules     String?
+  commissionFactorNumber  String?
+  firstPartyFactorNumber  String?
+  secondPartyFactorNumber String?
+  notes                   String?
 
   /// CRM-queryable financial / schedule fields (denormalized from terms forms)
   totalAmount      Decimal?  @db.Decimal(18, 2)
@@ -287,7 +302,7 @@ model Contract {
   deliveryDate     DateTime?
   officialDeedDate DateTime?
 
-  /// Structured by frontend (clauses, payment banks, form-only details)
+  /// @deprecated prefer typed *Details tables
   termsAndConditions Json?
 
   signedAt  DateTime?
@@ -300,11 +315,219 @@ model Contract {
   property     Property            @relation(fields: [propertyId], references: [id])
   parties      ContractParty[]
   signatures   ContractSignature[]
+  lawyers      ContractLawyer[]
+
+  saleDetails       SaleContractDetails?
+  rentDetails       RentContractDetails?
+  goodwillDetails   GoodwillContractDetails?
+  preSaleDetails    PreSaleContractDetails?
+  rescissionDetails MutualRescissionContractDetails?
+  cjvDetails        ConstructionJvContractDetails?
 
   @@unique([organizationId, contractNumber])
   @@index([organizationId])
   @@index([propertyId])
   @@index([createdById])
+}
+
+model ContractLawyer {
+  id                   String             @id @default(uuid())
+  contractId           String
+  side                 ContractLawyerSide
+  name                 String?
+  fatherName           String?
+  identityNumber       String?
+  birthPlace           String?
+  birthDate            String?
+  identityExportPlace  String?
+  nationalCode         String?
+  address              String?
+  postalCode           String?
+  cause                String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@unique([contractId, side])
+  @@index([contractId])
+}
+
+model SaleContractDetails {
+  id                             String   @id @default(uuid())
+  contractId                     String   @unique
+  shareUnits                     Float?
+  pricePerSqm                    Decimal? @db.Decimal(18, 2)
+  totalAmount                    Decimal? @db.Decimal(18, 2)
+  totalInWords                   String?
+  prePaymentAmount               Decimal? @db.Decimal(18, 2)
+  prePaymentChequeNumber         String?
+  prePaymentBankName             String?
+  prePaymentBankBranch           String?
+  remainderAmount                Decimal? @db.Decimal(18, 2)
+  voucherRegistrationDate        String?
+  voucherOrganizationNumber      String?
+  deliveryDate                   String?
+  cancelationPenalty             String?
+  breachPenalty                  String?
+  notaryFeePayer                 String?
+  delayPenaltyFirstPartyPerDay   Decimal? @db.Decimal(18, 2)
+  delayPenaltySecondPartyPerDay  Decimal? @db.Decimal(18, 2)
+  createdAt                      DateTime @default(now())
+  updatedAt                      DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+model RentContractDetails {
+  id                             String   @id @default(uuid())
+  contractId                     String   @unique
+  shareUnits                     Float?
+  durationMonths                 Int?
+  fromDate                       String?
+  toDate                         String?
+  monthlyAmount                  Decimal? @db.Decimal(18, 2)
+  monthlyInWords                 String?
+  mortgageAmount                 Decimal? @db.Decimal(18, 2)
+  mortgageInWords                String?
+  totalInWords                   String?
+  prePaymentAmount               Decimal? @db.Decimal(18, 2)
+  prePaymentChequeNumber         String?
+  prePaymentBankName             String?
+  prePaymentBankBranch           String?
+  remainderAmount                Decimal? @db.Decimal(18, 2)
+  remainderDueDate               String?
+  deliveryDate                   String?
+  cancelationPenalty             String?
+  breachPenalty                  String?
+  notaryFeePayer                 String?
+  delayPenaltyFirstPartyPerDay   Decimal? @db.Decimal(18, 2)
+  delayPenaltySecondPartyPerDay  Decimal? @db.Decimal(18, 2)
+  /// print property.ownerName
+  propertyOwnerName              String?
+  createdAt                      DateTime @default(now())
+  updatedAt                      DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+model GoodwillContractDetails {
+  id                     String   @id @default(uuid())
+  contractId             String   @unique
+  shareUnits             Float?
+  pricePerSqm            Decimal? @db.Decimal(18, 2)
+  totalAmount            Decimal? @db.Decimal(18, 2)
+  prePaymentAmount       Decimal? @db.Decimal(18, 2)
+  prePaymentChequeNumber String?
+  prePaymentBankName     String?
+  prePaymentBankBranch   String?
+  remainderAmount        Decimal? @db.Decimal(18, 2)
+  remainderDueDate       String?
+  penaltyAmount          String?
+  deliveryDate           String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+model PreSaleContractDetails {
+  id                        String   @id @default(uuid())
+  contractId                String   @unique
+  renovationCode            String?
+  technicalIdNumber         String?
+  insuranceNumber           String?
+  buildingPermitNumber      String?
+  buildingPermitDate        String?
+  equipped                  String?
+  totalFloors               Int?
+  totalUnits                Int?
+  areaSqm                   Float?
+  storage                   String?
+  orientation               String?
+  parkingNumberAndArea      String?
+  flooringType              String?
+  cabinetAndFaucetType      String?
+  bathroomType              String?
+  switchOutletType          String?
+  entranceDoorType          String?
+  interiorDoorType          String?
+  ceilingPlasterType        String?
+  emergencyWaterSourceType  String?
+  heatingType               String?
+  coolerType                String?
+  intercomType              String?
+  cctv                      String?
+  tilingType                String?
+  windowType                String?
+  facadeType                String?
+  parkingFloorWallCover     String?
+  lighting                  String?
+  balconyCorridorRailing    String?
+  fireExtinguisher          String?
+  elevator                  String?
+  waterMotor                String?
+  utilitiesScore            String?
+  loan                      String?
+  loanType                  String?
+  loanInstallmentAmount     Decimal? @db.Decimal(18, 2)
+  totalAmount               Decimal? @db.Decimal(18, 2)
+  totalInWords              String?
+  deliveryDate              String?
+  deedTransferDate          String?
+  selfDeclareFormNumber     String?
+  voucherOrganizationNumber String?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+model MutualRescissionContractDetails {
+  id                   String   @id @default(uuid())
+  contractId           String   @unique
+  originalContractNumber String?
+  originalContractDate   String?
+  originalAgencyName     String?
+  shareUnits             Float?
+  areaSqm                Float?
+  county                 String?
+  ownershipNumber        String?
+  aggregationClause      String?
+  deliveryClause         String?
+  price                  Decimal? @db.Decimal(18, 2)
+  paymentType            String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+model ConstructionJvContractDetails {
+  id                             String   @id @default(uuid())
+  contractId                     String   @unique
+  propertyDescription            String?
+  shareUnits                     Float?
+  areaSqm                        Float?
+  totalAmount                    Decimal? @db.Decimal(18, 2)
+  totalInWords                   String?
+  governmentalCosts              Decimal? @db.Decimal(18, 2)
+  constructionCosts              Decimal? @db.Decimal(18, 2)
+  facilityRightsCosts            Decimal? @db.Decimal(18, 2)
+  destructionCost                Decimal? @db.Decimal(18, 2)
+  firstPartyShare                String?
+  secondPartyShare               String?
+  startDateInWords               String?
+  endDateInWords                 String?
+  costDetailsPrepareDate         String?
+  voucherTransferDate            String?
+  shareUnitsToTransfer           String?
+  delayPenaltyFirstPartyPerDay   Decimal? @db.Decimal(18, 2)
+  delayPenaltySecondPartyPerDay  Decimal? @db.Decimal(18, 2)
+  createdAt                      DateTime @default(now())
+  updatedAt                      DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 }
 
 model ContractParty {
