@@ -110,6 +110,7 @@ model Organization {
   parties       Party[]
   contracts     Contract[]
   printLayouts  ContractPrintLayout[]
+  files         File[]
 
   @@index([addressId])
 }
@@ -132,6 +133,7 @@ model User {
   sessions        Session[]
   ownedProperties Property[]    @relation("PropertyOwner")
   createdContracts Contract[]   @relation("ContractCreator")
+  uploadedFiles    File[]       @relation("FileUploader")
 
   @@unique([organizationId, email])
   @@index([organizationId])
@@ -568,15 +570,24 @@ model ContractPrintLayout {
 }
 
 model File {
-  id          String   @id @default(uuid())
-  name        String
-  path        String
-  contentType String
-  size        Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  /// Null only when uploaded by platform ADMIN without an org context
+  organizationId String?
+  uploadedById   String
+  name           String
+  /// Relative path under uploads/ (never a public URL)
+  path           String
+  contentType    String
+  size           Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  signatures ContractSignature[]
+  organization Organization?       @relation(fields: [organizationId], references: [id])
+  uploadedBy   User                @relation("FileUploader", fields: [uploadedById], references: [id])
+  signatures   ContractSignature[]
+
+  @@index([organizationId])
+  @@index([uploadedById])
 }
 
 model ContractSignature {

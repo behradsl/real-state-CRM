@@ -130,11 +130,18 @@ export class UsersService {
     }
 
     try {
-      return await this.prisma.user.update({
+      const updated = await this.prisma.user.update({
         where: { id },
         data,
         select: userPublicSelect,
       });
+
+      // Password change or deactivation → revoke all sessions for that user
+      if (dto.password || dto.isActive === false) {
+        await this.prisma.session.deleteMany({ where: { userId: id } });
+      }
+
+      return updated;
     } catch (error) {
       this.handlePrismaError(error);
     }

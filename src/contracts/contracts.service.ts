@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import {
 import {
   assertCanAccessContract,
   contractListWhere,
+  isAdmin,
   resolveScopedOrganizationId,
 } from '../common/utils/access-scope.util';
 import { PartiesService } from '../parties/parties.service';
@@ -581,10 +583,30 @@ export class ContractsService {
     if (dto.fileId) {
       const file = await this.prisma.file.findUnique({
         where: { id: dto.fileId },
-        select: { id: true },
+        select: { id: true, organizationId: true, uploadedById: true },
       });
       if (!file) {
         throw new NotFoundException(`File ${dto.fileId} not found`);
+      }
+      if (!isAdmin(actor)) {
+        const sameOrg =
+          actor.organizationId &&
+          file.organizationId &&
+          actor.organizationId === file.organizationId;
+        const ownUpload = file.uploadedById === actor.id;
+        if (!sameOrg && !ownUpload) {
+          throw new ForbiddenException(
+            'fileId must belong to your organization',
+          );
+        }
+      }
+      if (
+        file.organizationId &&
+        file.organizationId !== contract.organizationId
+      ) {
+        throw new BadRequestException(
+          'fileId must belong to the contract organization',
+        );
       }
     }
 

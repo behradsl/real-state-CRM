@@ -13,12 +13,28 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL ?? 'admin@platform.local';
-  const password = process.env.ADMIN_PASSWORD ?? 'Admin12345';
+  const isProd = process.env.NODE_ENV === 'production';
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
   const firstName = process.env.ADMIN_FIRST_NAME ?? 'Platform';
   const lastName = process.env.ADMIN_LAST_NAME ?? 'Admin';
+  const resetPassword = process.env.ADMIN_RESET_PASSWORD === 'true';
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  if (!email?.trim()) {
+    throw new Error('ADMIN_EMAIL is required to seed the platform admin');
+  }
+  if (!password || password.length < 12) {
+    throw new Error(
+      'ADMIN_PASSWORD is required and must be at least 12 characters',
+    );
+  }
+  if (isProd && password === 'Admin12345') {
+    throw new Error(
+      'Refuse to seed production with the documented example ADMIN_PASSWORD',
+    );
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
 
   const existing = await prisma.user.findFirst({
     where: {
@@ -32,7 +48,7 @@ async function main() {
     ? await prisma.user.update({
         where: { id: existing.id },
         data: {
-          passwordHash,
+          ...(resetPassword ? { passwordHash } : {}),
           firstName,
           lastName,
           isActive: true,
@@ -51,7 +67,14 @@ async function main() {
       });
 
   console.log(`Platform ADMIN ready: ${admin.email} (id=${admin.id})`);
-  console.log('Login: POST /auth/login with email/password and no organizationSlug');
+  if (existing && !resetPassword) {
+    console.log(
+      'Existing admin password left unchanged (set ADMIN_RESET_PASSWORD=true to rotate).',
+    );
+  }
+  console.log(
+    'Login: POST /auth/login with email/password and no organizationSlug',
+  );
 }
 
 main()

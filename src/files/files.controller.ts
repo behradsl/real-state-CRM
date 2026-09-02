@@ -1,8 +1,10 @@
 import {
   Controller,
   Get,
+  Header,
   Param,
   Post,
+  StreamableFile,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -14,6 +16,7 @@ import {
   ApiCookieAuth,
   ApiOperation,
   ApiParam,
+  ApiProduces,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -56,7 +59,7 @@ export class FilesController {
   @ApiOperation({
     summary: 'Upload a file',
     description:
-      'Stores the file under /uploads and returns a File record. Use the id as fileId on contract signatures.',
+      'Stores PDF/JPEG/PNG/WebP under a private uploads directory. Use GET /files/:id/download to fetch content. Use the id as fileId on contract signatures.',
   })
   @ApiResponse({
     status: 201,
@@ -83,5 +86,18 @@ export class FilesController {
   @ApiResponse({ status: 404, description: 'File not found' })
   findOne(@CurrentUser() actor: PublicUser, @Param('id') id: string) {
     return this.filesService.findOne(actor, id);
+  }
+
+  @Get(':id/download')
+  @ApiOperation({ summary: 'Download file content (authenticated)' })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  @ApiProduces('application/octet-stream')
+  @ApiResponse({ status: 200, description: 'File bytes' })
+  @Header('X-Content-Type-Options', 'nosniff')
+  download(
+    @CurrentUser() actor: PublicUser,
+    @Param('id') id: string,
+  ): Promise<StreamableFile> {
+    return this.filesService.download(actor, id);
   }
 }

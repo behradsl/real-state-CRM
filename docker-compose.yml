@@ -1,4 +1,6 @@
 services:
+  # Local development only — do not publish this Postgres port on production hosts.
+  # For production, use a managed DB (or compose without host ports) and strong secrets.
   db:
     image: postgres:16-alpine
     container_name: real-estate-crm-db
